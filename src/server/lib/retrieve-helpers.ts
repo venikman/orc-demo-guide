@@ -288,9 +288,16 @@ export function matchesFilter(record: PublicEncounterRecord, filter: SearchFilte
   }
 
   if (filter.type === "location") {
+    const normalizedSearchValues = new Set(
+      searchValues
+        .map((value) => normalizeSearchPhrase(value, true))
+        .filter(Boolean),
+    );
+    const normalizedLocationId = normalizeSearchPhrase(record.locationId, true);
+
     return (
       matchesCandidate(record.locationName, searchValues, true) ||
-      matchesCandidate(record.locationId, searchValues, true) ||
+      normalizedSearchValues.has(normalizedLocationId) ||
       matchesCandidate(record.organizationName, searchValues, true)
     );
   }

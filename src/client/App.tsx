@@ -189,6 +189,7 @@ const FLOW_GROUPS: Record<
   ],
   deny: [
     { key: "intake", title: "Intake", traceIds: ["receive"], dataId: "intake" },
+    { key: "planning", title: "Planning", traceIds: [], dataId: "planning" },
     { key: "policy", title: "Policy", traceIds: ["policy"], dataId: "policy" },
   ],
 };
@@ -413,7 +414,11 @@ export function App() {
             </div>
 
             <form className="flex flex-col gap-3 md:flex-row" onSubmit={onSubmit}>
+              <label htmlFor="cohort-query" className="sr-only">
+                Cohort request
+              </label>
               <Input
+                id="cohort-query"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Describe the cohort request"
@@ -637,7 +642,7 @@ export function App() {
                     <TableFooter>
                       <TableRow>
                         <TableCell colSpan={3}>
-                          Showing {response.previewCount} of {response.totalResults} encounters
+                          Showing {payloadPreview.length} of {response.totalResults} encounters
                         </TableCell>
                         <TableCell className="text-right">
                           {response.monitoring.aiUsage.transport}

@@ -25,6 +25,7 @@ type CompileContext = {
   presetId: string;
   transport: SearchTransportMode;
   threadId?: string;
+  signal?: AbortSignal;
 };
 
 const SEARCH_PLAN_SOURCE_MODE: SearchSourceMode = "langchain_google_agent";
@@ -83,6 +84,20 @@ export class GeminiModelRequirementError extends Error {
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error);
+}
+
+function isAbortError(error: unknown) {
+  return error instanceof Error && error.name === "AbortError";
+}
+
+function throwIfAborted(signal?: AbortSignal) {
+  signal?.throwIfAborted?.();
+
+  if (signal?.aborted) {
+    throw signal.reason instanceof Error
+      ? signal.reason
+      : new DOMException("The operation was aborted.", "AbortError");
+  }
 }
 
 function isUnavailableModelError(error: unknown) {
@@ -306,10 +321,14 @@ export async function compileSearchPlan(prompt: string, context: CompileContext)
     );
   }
 
+  const effectiveThreadId = context.threadId ?? context.requestId;
   let lastErrorMessage: string | null = null;
+  let hadInvocationError = false;
 
   for (const model of env.modelCandidates) {
     try {
+      throwIfAborted(context.signal);
+
       logEvent("llm.agent.request", {
         request_id: context.requestId,
         preset_id: context.presetId,
@@ -317,10 +336,10 @@ export async function compileSearchPlan(prompt: string, context: CompileContext)
         runtime: "createAgent",
         provider: "google_genai",
         transport: context.transport,
-        thread_id: context.threadId ?? null,
+        thread_id: effectiveThreadId,
         model,
         model_candidates: env.modelCandidates,
-        prompt,
+        prompt_length: prompt.length,
       });
 
       const llm = new ChatGoogleGenerativeAI({
@@ -342,11 +361,13 @@ export async function compileSearchPlan(prompt: string, context: CompileContext)
           messages: [{ role: "user", content: prompt }],
         },
         {
+          signal: context.signal,
           configurable: {
-            thread_id: context.threadId ?? context.requestId,
+            thread_id: effectiveThreadId,
           },
         },
       );
+      throwIfAborted(context.signal);
       const structuredPayload = extractStructuredPayload(result);
 
       const normalizedPlan = normalizeModelPlan(
@@ -356,7 +377,7 @@ export async function compileSearchPlan(prompt: string, context: CompileContext)
           ),
         ),
       );
-      const aiUsage = buildAiUsage(model, context.transport, context.threadId, result.messages);
+      const aiUsage = buildAiUsage(model, context.transport, effectiveThreadId, result.messages);
 
       logEvent("llm.agent.response", {
         request_id: context.requestId,
@@ -381,6 +402,10 @@ export async function compileSearchPlan(prompt: string, context: CompileContext)
         aiUsage,
       };
     } catch (error) {
+      if (isAbortError(error)) {
+        throw error;
+      }
+
       const message = getErrorMessage(error);
       lastErrorMessage = message;
 
@@ -400,10 +425,8 @@ export async function compileSearchPlan(prompt: string, context: CompileContext)
         model,
         error: message,
       });
-      throw new GeminiModelRequirementError(
-        `Gemini 3.x request failed for ${model}.`,
-        502,
-      );
+      hadInvocationError = true;
+      continue;
     }
   }
 
@@ -417,6 +440,14 @@ export async function compileSearchPlan(prompt: string, context: CompileContext)
     model_candidates: env.modelCandidates,
     error: failureMessage,
   });
+
+  if (hadInvocationError) {
+    throw new GeminiModelRequirementError(
+      `Gemini 3.x request failed after trying ${env.modelCandidates.join(", ")}. Last error: ${failureMessage}`,
+      502,
+    );
+  }
+
   throw new GeminiModelRequirementError(
     `Gemini 3.x models are unavailable for this project or region. Tried: ${env.modelCandidates.join(", ")}.`,
   );

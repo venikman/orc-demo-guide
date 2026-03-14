@@ -14,15 +14,27 @@ type SearchWorkflowInput = {
   presetId: PresetId;
   transport: SearchTransportMode;
   threadId?: string;
+  signal?: AbortSignal;
 };
 
+function throwIfAborted(signal?: AbortSignal) {
+  signal?.throwIfAborted?.();
+
+  if (signal?.aborted) {
+    throw signal.reason instanceof Error
+      ? signal.reason
+      : new DOMException("The operation was aborted.", "AbortError");
+  }
+}
+
 export async function runSearchWorkflow(input: SearchWorkflowInput): Promise<SearchResponseEnvelope> {
+  throwIfAborted(input.signal);
   const preset = getPreset(input.presetId);
 
   logEvent("api.search.request", {
     request_id: input.requestId,
     preset_id: input.presetId,
-    prompt: input.prompt,
+    prompt_length: input.prompt.length,
     transport: input.transport,
     thread_id: input.threadId ?? null,
   });
@@ -32,8 +44,10 @@ export async function runSearchWorkflow(input: SearchWorkflowInput): Promise<Sea
     presetId: input.presetId,
     transport: input.transport,
     threadId: input.threadId,
+    signal: input.signal,
   });
 
+  throwIfAborted(input.signal);
   const response = executeSearch(input.prompt, preset, plan, {
     requestId: input.requestId,
     sourceMode,
@@ -53,7 +67,7 @@ export async function runSearchWorkflow(input: SearchWorkflowInput): Promise<Sea
     filters: plan.filters,
     clarification_question: response.clarificationQuestion,
     denial_reason: response.denialReason,
-    preview_names: response.results.slice(0, response.previewCount).map((result) => result.name),
+    preview_count: Math.min(response.previewCount, response.totalResults),
   });
 
   logEvent("monitor.ai_usage", {

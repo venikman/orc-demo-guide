@@ -19,10 +19,17 @@ function getMatchedConditions(record: PublicEncounterRecord, filters: SearchFilt
 
   const matched = record.conditions.filter((condition) =>
     conditionFilters.some((filter) => {
-      const lowerValue = normalizeText(filter.value);
-      return condition.aliases.some(
-        (alias) => alias.includes(lowerValue) || lowerValue.includes(alias),
-      );
+      const filterValues = [filter.canonicalValue, filter.value]
+        .filter((value): value is string => Boolean(value?.trim()))
+        .map((value) => normalizeText(value));
+
+      return condition.aliases.some((alias) => {
+        const normalizedAlias = normalizeText(alias);
+        return filterValues.some(
+          (filterValue) =>
+            normalizedAlias.includes(filterValue) || filterValue.includes(normalizedAlias),
+        );
+      });
     }),
   );
 

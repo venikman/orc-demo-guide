@@ -28,6 +28,23 @@ function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unexpected server error";
 }
 
+function createAbortError() {
+  return new DOMException("The operation was aborted.", "AbortError");
+}
+
+function isAbortError(error: unknown) {
+  return error instanceof Error && error.name === "AbortError";
+}
+
+function getSearchInputPayload(payload: unknown) {
+  if (!payload || typeof payload !== "object") {
+    return payload;
+  }
+
+  const input = (payload as Record<string, unknown>).input;
+  return input && typeof input === "object" ? input : payload;
+}
+
 function getThreadId(payload: unknown) {
   if (!payload || typeof payload !== "object") {
     return undefined;
@@ -48,20 +65,54 @@ function getThreadId(payload: unknown) {
 }
 
 function createSseResponse(
-  run: (send: (event: string, data: unknown) => void) => Promise<void>,
+  requestSignal: AbortSignal | undefined,
+  run: (send: (event: string, data: unknown) => void, signal: AbortSignal) => Promise<void>,
 ) {
+  const abortController = new AbortController();
+  const abort = () => {
+    if (!abortController.signal.aborted) {
+      abortController.abort(createAbortError());
+    }
+  };
+  const onRequestAbort = () => abort();
+
+  if (requestSignal?.aborted) {
+    abort();
+  }
+
   return new Response(
     new ReadableStream({
       async start(controller) {
+        if (requestSignal && !requestSignal.aborted) {
+          requestSignal.addEventListener("abort", onRequestAbort, { once: true });
+        }
+
         const send = (event: string, data: unknown) => {
+          if (abortController.signal.aborted) {
+            return;
+          }
+
           controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
         };
 
         try {
-          await run(send);
+          await run(send, abortController.signal);
+        } catch (error) {
+          if (!isAbortError(error)) {
+            controller.error(error);
+          }
         } finally {
-          controller.close();
+          requestSignal?.removeEventListener("abort", onRequestAbort);
+          try {
+            controller.close();
+          } catch {
+            // The stream may already be closed when the client disconnects.
+          }
         }
+      },
+      cancel() {
+        requestSignal?.removeEventListener("abort", onRequestAbort);
+        abort();
       },
     }),
     {
@@ -89,6 +140,7 @@ app.get("/api/presets", (c) =>
 
 app.post("/api/search", async (c) => {
   const requestId = crypto.randomUUID();
+  const signal = c.req.raw.signal;
 
   try {
     const payload = searchRequestInputSchema.parse(await c.req.json());
@@ -97,6 +149,7 @@ app.post("/api/search", async (c) => {
       prompt: payload.prompt,
       presetId: payload.presetId,
       transport: "request_reply",
+      signal,
     });
 
     return c.json<SearchResponseEnvelope>(response);
@@ -119,16 +172,19 @@ app.post("/api/search", async (c) => {
 
 app.post("/api/search/stream", async (c) => {
   const requestId = crypto.randomUUID();
+  const requestSignal = c.req.raw.signal;
 
   try {
     const payload = await c.req.json();
-    const input = searchRequestInputSchema.parse(
-      payload && typeof payload === "object" ? (payload as Record<string, unknown>).input : payload,
-    );
+    const input = searchRequestInputSchema.parse(getSearchInputPayload(payload));
     const threadId = getThreadId(payload);
 
-    return createSseResponse(async (send) => {
+    return createSseResponse(requestSignal, async (send, signal) => {
       try {
+        if (signal.aborted) {
+          return;
+        }
+
         send("values", {
           prompt: input.prompt,
           presetId: input.presetId,
@@ -141,7 +197,12 @@ app.post("/api/search/stream", async (c) => {
           presetId: input.presetId,
           transport: "use_stream",
           threadId,
+          signal,
         });
+
+        if (signal.aborted) {
+          return;
+        }
 
         send("values", {
           prompt: input.prompt,
@@ -149,6 +210,10 @@ app.post("/api/search/stream", async (c) => {
           response,
         });
       } catch (error) {
+        if (isAbortError(error) || signal.aborted) {
+          return;
+        }
+
         const statusCode = getErrorStatusCode(error);
         logEvent("api.search.error", {
           request_id: requestId,
@@ -174,7 +239,7 @@ app.post("/api/search/stream", async (c) => {
       transport: "use_stream",
     });
 
-    return createSseResponse(async (send) => {
+    return createSseResponse(requestSignal, async (send) => {
       send("error", {
         requestId,
         statusCode,

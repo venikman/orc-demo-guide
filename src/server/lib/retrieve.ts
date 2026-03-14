@@ -270,7 +270,7 @@ export function executeSearch(
   logEvent("retrieval.response", {
     request_id: request.request_id,
     matched: visibleMatches.length,
-    preview_names: visibleMatches.slice(0, PREVIEW_COUNT).map((result) => result.name),
+    preview_count: Math.min(visibleMatches.length, PREVIEW_COUNT),
   });
 
   return finalizeResponse(request.request_id, preset, {
