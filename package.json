@@ -1,0 +1,29 @@
+{
+  "name": "orc-demo-guide",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k \"bun run dev:server\" \"bun run dev:client\"",
+    "dev:client": "vite",
+    "dev:server": "bun --watch src/server/index.ts",
+    "dev:gemini": "bun run dev",
+    "build": "vite build && bun build src/server/index.ts --outdir dist/server --target bun",
+    "start": "bun dist/server/index.js",
+    "check:gemini-key": "node --input-type=module -e 'if(!process.env.GEMINI_API_KEY) throw new Error(\"GEMINI_API_KEY missing\"); console.log(\"Gemini API key present\")'"
+  },
+  "dependencies": {
+    "@google/genai": "^1.28.0",
+    "hono": "^4.8.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
+    "typescript": "^5.8.3",
+    "vite": "^6.2.0"
+  }
+}

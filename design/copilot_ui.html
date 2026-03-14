@@ -1,0 +1,331 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.shell{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:16px;display:flex;flex-direction:column;gap:12px}
+.topbar{display:flex;align-items:center;gap:10px;padding:0 4px}
+.logo{width:32px;height:32px;border-radius:var(--border-radius-md);background:#534AB7;display:flex;align-items:center;justify-content:center}
+.logo svg{width:16px;height:16px}
+.topbar-title{font-size:15px;font-weight:500;color:var(--color-text-primary)}
+.topbar-sub{font-size:12px;color:var(--color-text-tertiary);margin-left:auto}
+.dot{width:8px;height:8px;border-radius:50%;background:#1D9E75;margin-left:8px}
+.search-area{background:var(--color-background-primary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);padding:16px;display:flex;flex-direction:column;gap:12px}
+.search-row{display:flex;gap:8px;align-items:center}
+.search-input{flex:1;height:40px;border-radius:20px;border:0.5px solid var(--color-border-secondary);padding:0 16px;font-size:14px;background:var(--color-background-primary);color:var(--color-text-primary);outline:none;transition:border-color .15s}
+.search-input:focus{border-color:#534AB7}
+.search-btn{width:40px;height:40px;border-radius:50%;background:#534AB7;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .15s}
+.search-btn:hover{opacity:.85}
+.search-btn:active{transform:scale(.96)}
+.search-btn svg{width:16px;height:16px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:12px;padding:4px 12px;border-radius:16px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);color:var(--color-text-secondary);cursor:pointer;transition:all .15s;user-select:none}
+.chip.active{background:#EEEDFE;color:#3C3489;border-color:#AFA9EC}
+.chip:hover{border-color:var(--color-border-secondary)}
+.flow-panel{background:var(--color-background-primary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);overflow:hidden}
+.flow-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none}
+.flow-header:hover{background:var(--color-background-secondary)}
+.flow-label{font-size:13px;font-weight:500;color:var(--color-text-primary);display:flex;align-items:center;gap:8px}
+.flow-tag{font-size:11px;padding:2px 8px;border-radius:10px;background:#EEEDFE;color:#3C3489}
+.flow-toggle{font-size:12px;color:var(--color-text-tertiary);transition:transform .2s}
+.flow-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.flow-body.open{max-height:800px}
+.timeline{padding:4px 16px 16px 16px;display:flex;flex-direction:column;gap:0}
+.step{display:flex;gap:12px;position:relative;cursor:pointer}
+.step:hover .step-card{border-color:var(--color-border-secondary)}
+.rail{display:flex;flex-direction:column;align-items:center;width:24px;flex-shrink:0}
+.node-dot{width:12px;height:12px;border-radius:50%;border:2px solid #AFA9EC;background:var(--color-background-primary);z-index:1;transition:all .2s}
+.step.done .node-dot{background:#534AB7;border-color:#534AB7}
+.step.active .node-dot{background:#534AB7;border-color:#534AB7;box-shadow:0 0 0 3px #EEEDFE}
+.rail-line{width:2px;flex:1;background:var(--color-border-tertiary);min-height:8px}
+.step.done .rail-line{background:#AFA9EC}
+.step:last-child .rail-line{display:none}
+.step-card{flex:1;padding:8px 12px;border-radius:var(--border-radius-md);border:0.5px solid transparent;transition:border-color .15s}
+.step.active .step-card{background:var(--color-background-secondary);border-color:#AFA9EC}
+.step-title{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px;display:flex;align-items:center;gap:6px}
+.step-agent{font-size:11px;padding:1px 6px;border-radius:4px}
+.sa-purple{background:#EEEDFE;color:#3C3489}
+.sa-teal{background:#E1F5EE;color:#085041}
+.sa-blue{background:#E6F1FB;color:#0C447C}
+.sa-coral{background:#FAECE7;color:#712B13}
+.step-desc{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+.step-detail{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.step-detail.open{max-height:200px}
+.step-detail-inner{padding-top:6px;font-size:12px;color:var(--color-text-tertiary);line-height:1.5;font-family:var(--font-mono);border-top:0.5px solid var(--color-border-tertiary);margin-top:6px}
+.step-time{font-size:11px;color:var(--color-text-tertiary);margin-left:auto;flex-shrink:0;font-family:var(--font-mono)}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.stat{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px}
+.stat-label{font-size:11px;color:var(--color-text-tertiary);margin-bottom:2px}
+.stat-val{font-size:20px;font-weight:500;color:var(--color-text-primary)}
+.results{display:flex;flex-direction:column;gap:8px}
+.result-card{background:var(--color-background-primary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);padding:14px 16px;cursor:pointer;transition:border-color .15s}
+.result-card:hover{border-color:var(--color-border-secondary)}
+.result-card.expanded{border-color:#AFA9EC}
+.rc-top{display:flex;align-items:center;gap:10px}
+.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0}
+.av-1{background:#E6F1FB;color:#0C447C}
+.av-2{background:#E1F5EE;color:#085041}
+.av-3{background:#FAEEDA;color:#633806}
+.rc-name{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.rc-meta{font-size:12px;color:var(--color-text-secondary)}
+.rc-badges{display:flex;gap:4px;margin-left:auto;flex-shrink:0}
+.badge{font-size:11px;padding:2px 8px;border-radius:10px}
+.badge-g{background:#EAF3DE;color:#27500A}
+.badge-a{background:#FAEEDA;color:#633806}
+.badge-b{background:#E6F1FB;color:#0C447C}
+.explain{overflow:hidden;max-height:0;transition:max-height .3s ease}
+.explain.open{max-height:300px}
+.explain-inner{padding-top:10px;border-top:0.5px solid var(--color-border-tertiary);margin-top:10px;font-size:12px;color:var(--color-text-secondary);line-height:1.6}
+.ev-row{display:flex;align-items:flex-start;gap:6px;margin-bottom:6px}
+.ev-dot{width:5px;height:5px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.ev-teal{background:#1D9E75}
+.ev-purple{background:#534AB7}
+.ev-amber{background:#BA7517}
+.source-tag{display:inline-block;font-size:11px;padding:1px 6px;border-radius:4px;background:var(--color-background-secondary);color:var(--color-text-tertiary);margin-left:4px}
+.contract-box{margin-top:6px;padding:8px 10px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);font-family:var(--font-mono);font-size:11px;color:var(--color-text-secondary);line-height:1.6;white-space:pre-wrap}
+</style>
+
+<div class="shell">
+  <div class="topbar">
+    <div class="logo"><svg viewBox="0 0 16 16" fill="none"><path d="M8 1L2 5v6l6 4 6-4V5L8 1z" stroke="#fff" stroke-width="1.2" fill="none"/><circle cx="8" cy="8" r="2" fill="#fff"/></svg></div>
+    <span class="topbar-title">Member search copilot</span>
+    <span class="topbar-sub">Prototype v1</span>
+    <div class="dot"></div>
+  </div>
+
+  <div class="search-area">
+    <div class="search-row">
+      <input class="search-input" id="q" value="Diabetic patients at Springfield clinic next Tuesday" />
+      <button class="search-btn" onclick="runSearch()"><svg viewBox="0 0 16 16" fill="none"><path d="M14 14l-3.5-3.5M11 6.5a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="chips">
+      <span class="chip active" onclick="toggle(this)">Condition</span>
+      <span class="chip active" onclick="toggle(this)">Location</span>
+      <span class="chip active" onclick="toggle(this)">Appointment</span>
+      <span class="chip" onclick="toggle(this)">Payer</span>
+      <span class="chip" onclick="toggle(this)">Coverage</span>
+      <span class="chip" onclick="toggle(this)">PA status</span>
+    </div>
+  </div>
+
+  <div class="flow-panel" id="flow-panel">
+    <div class="flow-header" onclick="toggleFlow()">
+      <span class="flow-label">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M5 6l3-3 3 3M5 10l3 3 3-3" stroke="var(--color-text-secondary)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Agent execution trace
+        <span class="flow-tag">7 steps</span>
+      </span>
+      <span class="flow-toggle" id="flow-arrow">&#9660;</span>
+    </div>
+    <div class="flow-body open" id="flow-body">
+      <div class="timeline">
+
+        <div class="step done" onclick="toggleStep(this)">
+          <div class="rail"><div class="node-dot"></div><div class="rail-line"></div></div>
+          <div class="step-card">
+            <div class="step-title">
+              Receive natural language
+              <span class="step-agent sa-purple">Manager agent</span>
+              <span class="step-time">0 ms</span>
+            </div>
+            <div class="step-desc">User typed: "Diabetic patients at Springfield clinic next Tuesday"</div>
+            <div class="step-detail">
+              <div class="step-detail-inner">Raw text passed to the Manager Agent. No preprocessing — the agent sees exactly what the user typed.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step done" onclick="toggleStep(this)">
+          <div class="rail"><div class="node-dot"></div><div class="rail-line"></div></div>
+          <div class="step-card">
+            <div class="step-title">
+              Parse intent into SearchRequest
+              <span class="step-agent sa-purple">Manager agent</span>
+              <span class="step-time">45 ms</span>
+            </div>
+            <div class="step-desc">Extracted 3 filters: condition, location, appointment window</div>
+            <div class="step-detail">
+              <div class="step-detail-inner"><div class="contract-box">{
+  "intent": "find_members",
+  "filters": [
+    {"type": "condition", "value": "diabetic"},
+    {"type": "location", "value": "Springfield clinic"},
+    {"type": "appointment", "value": "next Tuesday"}
+  ],
+  "output_mode": "cards"
+}</div>This is the typed SearchRequest contract. The LLM's job ends here — everything downstream is deterministic.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step done" onclick="toggleStep(this)">
+          <div class="rail"><div class="node-dot"></div><div class="rail-line"></div></div>
+          <div class="step-card">
+            <div class="step-title">
+              Resolve clinical terms
+              <span class="step-agent sa-teal">Term resolver</span>
+              <span class="step-time">82 ms</span>
+            </div>
+            <div class="step-desc">"diabetic" mapped to SNOMED concept set for diabetes mellitus</div>
+            <div class="step-detail">
+              <div class="step-detail-inner"><div class="contract-box">"diabetic" -> concept_set: {
+  ICD-10: [E11.*],
+  SNOMED: [44054006, 73211009],
+  confidence: 0.97
+}</div>The Term Resolver uses approved concept sets — it never guesses or approximates. If it can't map confidently, it asks the user to clarify.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step done" onclick="toggleStep(this)">
+          <div class="rail"><div class="node-dot"></div><div class="rail-line"></div></div>
+          <div class="step-card">
+            <div class="step-title">
+              Resolve scope
+              <span class="step-agent sa-teal">Scope resolver</span>
+              <span class="step-time">91 ms</span>
+            </div>
+            <div class="step-desc">"Springfield clinic" resolved to site ID site-4021</div>
+            <div class="step-detail">
+              <div class="step-detail-inner"><div class="contract-box">"Springfield clinic" -> {
+  site_id: "site-4021",
+  name: "Springfield Family Medicine",
+  match_type: "fuzzy",
+  confidence: 0.94
+}</div>The Scope Resolver maps natural language location names to canonical site IDs from the provider directory.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step done" onclick="toggleStep(this)">
+          <div class="rail"><div class="node-dot"></div><div class="rail-line"></div></div>
+          <div class="step-card">
+            <div class="step-title">
+              Execute deterministic retrieval
+              <span class="step-agent sa-blue">Query engine</span>
+              <span class="step-time">240 ms</span>
+            </div>
+            <div class="step-desc">Person index queried with all 3 filters intersected, returned 12 matches</div>
+            <div class="step-detail">
+              <div class="step-detail-inner"><div class="contract-box">SELECT persons
+WHERE condition IN concept_set
+  AND site = "site-4021"
+  AND appointment_date = "2026-03-17"
+-> 12 results</div>No LLM involved in this step. The query engine applies set intersection over the person index. Every result must satisfy ALL filters.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step done" onclick="toggleStep(this)">
+          <div class="rail"><div class="node-dot"></div><div class="rail-line"></div></div>
+          <div class="step-card">
+            <div class="step-title">
+              Validate evidence
+              <span class="step-agent sa-coral">Explanation builder</span>
+              <span class="step-time">305 ms</span>
+            </div>
+            <div class="step-desc">12/12 results have complete evidence paths across all 3 sources</div>
+            <div class="step-detail">
+              <div class="step-detail-inner">Each result checked for: evidence coverage (every person matches every filter), data freshness (appointments within 24h sync window), and source provenance (each fact tagged with origin system). 0 results dropped.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step active" onclick="toggleStep(this)">
+          <div class="rail"><div class="node-dot"></div><div class="rail-line"></div></div>
+          <div class="step-card">
+            <div class="step-title">
+              Build ExplanationArtifact
+              <span class="step-agent sa-coral">Explanation builder</span>
+              <span class="step-time">340 ms</span>
+            </div>
+            <div class="step-desc">Each result card gets per-match reasons with source tags</div>
+            <div class="step-detail">
+              <div class="step-detail-inner"><div class="contract-box">{
+  "interpreted_intent": "find_members",
+  "filters_applied": 3,
+  "sources_used": ["EHR","Scheduling","Payer"],
+  "match_count": 12,
+  "confidence": "high"
+}</div>This is the final ExplanationArtifact. Click any patient card below to see how it renders per-result.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-label">Matched</div><div class="stat-val">12</div></div>
+    <div class="stat"><div class="stat-label">Sources</div><div class="stat-val">3</div></div>
+    <div class="stat"><div class="stat-label">Latency</div><div class="stat-val">340 ms</div></div>
+  </div>
+
+  <div class="results">
+    <div class="result-card" onclick="toggleCard(this)">
+      <div class="rc-top">
+        <div class="avatar av-1">JM</div>
+        <div><div class="rc-name">James Mitchell</div><div class="rc-meta">DOB 1958-03-14 | MRN 90281</div></div>
+        <div class="rc-badges"><span class="badge badge-g">Active</span><span class="badge badge-b">Appt Tue</span></div>
+      </div>
+      <div class="explain">
+        <div class="explain-inner">
+          <div class="ev-row"><div class="ev-dot ev-teal"></div><div>Condition match: E11.9 Type 2 diabetes mellitus <span class="source-tag">EHR</span></div></div>
+          <div class="ev-row"><div class="ev-dot ev-purple"></div><div>Location match: Springfield Family Medicine <span class="source-tag">Scheduling</span></div></div>
+          <div class="ev-row"><div class="ev-dot ev-amber"></div><div>Appointment: Tue Mar 17 09:30 AM with Dr. Patel <span class="source-tag">Scheduling</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-card" onclick="toggleCard(this)">
+      <div class="rc-top">
+        <div class="avatar av-2">SR</div>
+        <div><div class="rc-name">Sofia Reyes</div><div class="rc-meta">DOB 1971-11-02 | MRN 44019</div></div>
+        <div class="rc-badges"><span class="badge badge-g">Active</span><span class="badge badge-b">Appt Tue</span></div>
+      </div>
+      <div class="explain">
+        <div class="explain-inner">
+          <div class="ev-row"><div class="ev-dot ev-teal"></div><div>Condition match: E11.65 Type 2 DM with hyperglycemia <span class="source-tag">EHR</span></div></div>
+          <div class="ev-row"><div class="ev-dot ev-purple"></div><div>Location match: Springfield Family Medicine <span class="source-tag">Scheduling</span></div></div>
+          <div class="ev-row"><div class="ev-dot ev-amber"></div><div>Appointment: Tue Mar 17 10:15 AM with Dr. Chen <span class="source-tag">Scheduling</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-card" onclick="toggleCard(this)">
+      <div class="rc-top">
+        <div class="avatar av-3">RB</div>
+        <div><div class="rc-name">Robert Banks</div><div class="rc-meta">DOB 1965-07-28 | MRN 77503</div></div>
+        <div class="rc-badges"><span class="badge badge-g">Active</span><span class="badge badge-a">PA pending</span></div>
+      </div>
+      <div class="explain">
+        <div class="explain-inner">
+          <div class="ev-row"><div class="ev-dot ev-teal"></div><div>Condition match: E11.42 Type 2 DM with polyneuropathy <span class="source-tag">EHR</span></div></div>
+          <div class="ev-row"><div class="ev-dot ev-purple"></div><div>Location match: Springfield Family Medicine <span class="source-tag">Scheduling</span></div></div>
+          <div class="ev-row"><div class="ev-dot ev-amber"></div><div>Appointment: Tue Mar 17 02:00 PM with Dr. Patel <span class="source-tag">Scheduling</span></div></div>
+          <div class="ev-row"><div class="ev-dot ev-amber"></div><div>Prior auth pending for CGM device <span class="source-tag">Payer</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggle(el){el.classList.toggle('active')}
+function toggleCard(el){
+  el.querySelector('.explain').classList.toggle('open');
+  el.classList.toggle('expanded');
+}
+function toggleFlow(){
+  var b=document.getElementById('flow-body');
+  b.classList.toggle('open');
+  var a=document.getElementById('flow-arrow');
+  a.style.transform=b.classList.contains('open')?'':'rotate(-90deg)';
+}
+function toggleStep(el){
+  var d=el.querySelector('.step-detail');
+  d.classList.toggle('open');
+}
+function runSearch(){
+  document.querySelectorAll('.step').forEach(function(s){s.classList.add('done');s.classList.remove('active')});
+  document.querySelector('.step:last-child').classList.add('active');
+}
+</script>
