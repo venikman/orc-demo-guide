@@ -1,3 +1,5 @@
+import { Match, pipe } from "effect";
+
 import type {
   FieldVisibilityState,
   SearchMatch,
@@ -70,40 +72,43 @@ export function getFieldVisibility(role: string, field: string): FieldVisibility
   return roleMatrix[field as VisibleField] ?? "hidden";
 }
 
+const REDACTABLE_FIELDS = new Set<VisibleField>([
+  "dob",
+  "name",
+  "patientIdentifier",
+  "organizationName",
+  "locationName",
+  "encounterLabel",
+]);
+
+function applyFieldToResult(result: SearchMatch, field: VisibleField, role: string): SearchMatch {
+  return pipe(
+    Match.value(getFieldVisibility(role, field)),
+    Match.when("visible", () => result),
+    Match.when("redacted", () =>
+      REDACTABLE_FIELDS.has(field)
+        ? { ...result, [field]: "***" }
+        : result,
+    ),
+    Match.when("hidden", () => {
+      if (field === "conditions") {
+        const { conditions: _, ...rest } = result;
+        return rest as SearchMatch;
+      }
+      return result;
+    }),
+    Match.exhaustive,
+  );
+}
+
 /**
  * Applies redaction and hiding rules to search results before they are returned.
  */
 export function applyFieldVisibility(results: SearchMatch[], role: string): SearchMatch[] {
-  return results.map((result) => {
-    const visibleResult: SearchMatch = {
-      ...result,
-    };
-
-    for (const field of FIELD_ORDER) {
-      const visibility = getFieldVisibility(role, field);
-      if (visibility === "visible") {
-        continue;
-      }
-
-      if (visibility === "redacted") {
-        if (
-          field === "dob" ||
-          field === "name" ||
-          field === "patientIdentifier" ||
-          field === "organizationName" ||
-          field === "locationName" ||
-          field === "encounterLabel"
-        ) {
-          visibleResult[field] = "***";
-        }
-        continue;
-      }
-
-      if (field === "conditions") {
-        delete visibleResult.conditions;
-      }
-    }
-
-    return visibleResult;
-  });
+  return results.map((result) =>
+    FIELD_ORDER.reduce<SearchMatch>(
+      (acc, field) => applyFieldToResult(acc, field, role),
+      { ...result },
+    ),
+  );
 }

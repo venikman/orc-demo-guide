@@ -1,3 +1,5 @@
+import { Match, pipe } from "effect";
+
 import type {
   AiUsage,
   DataFlowStage,
@@ -44,11 +46,13 @@ type SearchCounts = {
   visible: number;
 };
 
-function buildTransportDetail(transport: SearchTransportMode) {
-  return transport === "use_stream"
-    ? "Streamed to the client through LangChain useStream over the SSE search endpoint."
-    : "Returned through the request-reply JSON search endpoint.";
-}
+const buildTransportDetail = (transport: SearchTransportMode) =>
+  pipe(
+    Match.value(transport),
+    Match.when("use_stream", () => "Streamed to the client through LangChain useStream over the SSE search endpoint."),
+    Match.when("request_reply", () => "Returned through the request-reply JSON search endpoint."),
+    Match.exhaustive,
+  );
 
 function buildSuccessDataFlow(
   plan: SearchPlan,
@@ -155,12 +159,13 @@ function buildMonitoring(
       transport: context.transport,
       threadId: context.threadId ?? context.aiUsage.threadId,
     },
-    dataFlow:
-      plan.status === "ready"
-        ? buildSuccessDataFlow(plan, counts, context.transport)
-        : plan.status === "clarify"
-          ? buildClarifyDataFlow(plan, context.transport)
-          : buildDenyDataFlow(context.transport),
+    dataFlow: pipe(
+      Match.value(plan.status),
+      Match.when("ready", () => buildSuccessDataFlow(plan, counts, context.transport)),
+      Match.when("clarify", () => buildClarifyDataFlow(plan, context.transport)),
+      Match.when("deny", () => buildDenyDataFlow(context.transport)),
+      Match.exhaustive,
+    ),
   };
 }
 
@@ -201,41 +206,34 @@ export function executeSearch(
 ): SearchResponseEnvelope {
   const request = buildRequestEnvelope(context.requestId, prompt, preset, plan);
   const latencyMs = formatLatency(plan.status);
+  const base = {
+    requestId: request.request_id,
+    sourceMode: context.sourceMode,
+    modelUsed: context.modelUsed,
+    prompt,
+    presetId: preset.id,
+    plan,
+  } as const;
+  const zeroCounts: SearchCounts = { scoped: 0, filtered: 0, visible: 0 };
 
-  if (plan.status === "deny") {
-    return finalizeResponse(request.request_id, preset, {
-      requestId: request.request_id,
-      status: "deny",
-      sourceMode: context.sourceMode,
-      modelUsed: context.modelUsed,
-      prompt,
-      presetId: preset.id,
-      plan,
+  const response: ResponseWithoutPolicy = pipe(
+    Match.value(plan.status),
+    Match.when("deny", () => ({
+      ...base,
+      status: "deny" as const,
       interpretedSummary: plan.denialReason ?? "Request denied by the prototype safety policy.",
       stats: { matched: 0, sources: SOURCE_COUNT, latencyMs },
-      chips: [],
+      chips: [] as ("condition" | "location" | "encounter")[],
       trace: buildTrace(prompt, plan, 0),
       results: [],
       totalResults: 0,
       previewCount: PREVIEW_COUNT,
       denialReason: plan.denialReason ?? "Unsupported request.",
-      monitoring: buildMonitoring(plan, context, {
-        scoped: 0,
-        filtered: 0,
-        visible: 0,
-      }),
-    });
-  }
-
-  if (plan.status === "clarify") {
-    return finalizeResponse(request.request_id, preset, {
-      requestId: request.request_id,
-      status: "clarify",
-      sourceMode: context.sourceMode,
-      modelUsed: context.modelUsed,
-      prompt,
-      presetId: preset.id,
-      plan,
+      monitoring: buildMonitoring(plan, context, zeroCounts),
+    })),
+    Match.when("clarify", () => ({
+      ...base,
+      status: "clarify" as const,
       interpretedSummary: plan.clarificationQuestion ?? "One more detail is needed before retrieval.",
       stats: { matched: 0, sources: SOURCE_COUNT, latencyMs },
       chips: plan.filters.map((filter) => filter.type),
@@ -244,58 +242,49 @@ export function executeSearch(
       totalResults: 0,
       previewCount: PREVIEW_COUNT,
       clarificationQuestion: plan.clarificationQuestion,
-      monitoring: buildMonitoring(plan, context, {
-        scoped: 0,
-        filtered: 0,
-        visible: 0,
-      }),
-    });
-  }
+      monitoring: buildMonitoring(plan, context, zeroCounts),
+    })),
+    Match.when("ready", () => {
+      const scopedRecords = enforcePresetScope(getPublicDatasetRecords(), preset);
+      logEvent("retrieval.request", {
+        request_id: request.request_id,
+        role: preset.requester.role,
+        filters: plan.filters,
+        scoped_candidates: scopedRecords.length,
+      });
 
-  const scopedRecords = enforcePresetScope(getPublicDatasetRecords(), preset);
-  logEvent("retrieval.request", {
-    request_id: request.request_id,
-    role: preset.requester.role,
-    filters: plan.filters,
-    scoped_candidates: scopedRecords.length,
-  });
+      const filteredRecords = plan.filters.reduce(
+        (current, filter) => current.filter((record) => matchesFilter(record, filter)),
+        scopedRecords,
+      );
+      const filteredMatches = filteredRecords.map((record) => buildSearchMatch(record, plan));
+      const visibleMatches = applyFieldVisibility(filteredMatches, preset.requester.role);
 
-  const filteredRecords = plan.filters.reduce(
-    (current, filter) => current.filter((record) => matchesFilter(record, filter)),
-    scopedRecords,
-  );
-  const filteredMatches = filteredRecords.map((record) => buildSearchMatch(record, plan));
-  const visibleMatches = applyFieldVisibility(filteredMatches, preset.requester.role);
+      logEvent("retrieval.response", {
+        request_id: request.request_id,
+        matched: visibleMatches.length,
+        preview_count: Math.min(visibleMatches.length, PREVIEW_COUNT),
+      });
 
-  logEvent("retrieval.response", {
-    request_id: request.request_id,
-    matched: visibleMatches.length,
-    preview_count: Math.min(visibleMatches.length, PREVIEW_COUNT),
-  });
-
-  return finalizeResponse(request.request_id, preset, {
-    requestId: request.request_id,
-    status: "success",
-    sourceMode: context.sourceMode,
-    modelUsed: context.modelUsed,
-    prompt,
-    presetId: preset.id,
-    plan,
-    interpretedSummary: plan.summary ?? "Natural-language query compiled into deterministic cohort filters.",
-    stats: {
-      matched: visibleMatches.length,
-      sources: getPublicDatasetSourceCount(),
-      latencyMs,
-    },
-    chips: plan.filters.map((filter) => filter.type),
-    trace: buildTrace(prompt, plan, visibleMatches.length),
-    results: visibleMatches,
-    totalResults: visibleMatches.length,
-    previewCount: PREVIEW_COUNT,
-    monitoring: buildMonitoring(plan, context, {
-      scoped: scopedRecords.length,
-      filtered: filteredRecords.length,
-      visible: visibleMatches.length,
+      return {
+        ...base,
+        status: "success" as const,
+        interpretedSummary: plan.summary ?? "Natural-language query compiled into deterministic cohort filters.",
+        stats: { matched: visibleMatches.length, sources: getPublicDatasetSourceCount(), latencyMs },
+        chips: plan.filters.map((filter) => filter.type),
+        trace: buildTrace(prompt, plan, visibleMatches.length),
+        results: visibleMatches,
+        totalResults: visibleMatches.length,
+        previewCount: PREVIEW_COUNT,
+        monitoring: buildMonitoring(plan, context, {
+          scoped: scopedRecords.length,
+          filtered: filteredRecords.length,
+          visible: visibleMatches.length,
+        }),
+      };
     }),
-  });
+    Match.exhaustive,
+  );
+
+  return finalizeResponse(request.request_id, preset, response);
 }

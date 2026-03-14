@@ -1,3 +1,5 @@
+import { Match, pipe } from "effect";
+
 import type {
   DemoSessionPreset,
   PolicyDecision,
@@ -18,29 +20,23 @@ const POLICY_FIELDS = [
   "explanations",
 ] as const;
 
-function getAction(status: SearchResponseEnvelope["status"]) {
-  if (status === "success") {
-    return "allow";
-  }
+const getAction = (status: SearchResponseEnvelope["status"]) =>
+  pipe(
+    Match.value(status),
+    Match.when("success", () => "allow" as const),
+    Match.when("clarify", () => "escalate" as const),
+    Match.when("deny", () => "deny" as const),
+    Match.exhaustive,
+  );
 
-  if (status === "clarify") {
-    return "escalate";
-  }
-
-  return "deny";
-}
-
-function getReason(response: SearchResponseEnvelope) {
-  if (response.status === "success") {
-    return response.interpretedSummary;
-  }
-
-  if (response.status === "clarify") {
-    return response.clarificationQuestion ?? response.interpretedSummary;
-  }
-
-  return response.denialReason ?? response.interpretedSummary;
-}
+const getReason = (response: SearchResponseEnvelope) =>
+  pipe(
+    Match.value(response.status),
+    Match.when("success", () => response.interpretedSummary),
+    Match.when("clarify", () => response.clarificationQuestion ?? response.interpretedSummary),
+    Match.when("deny", () => response.denialReason ?? response.interpretedSummary),
+    Match.exhaustive,
+  );
 
 /**
  * Builds the policy artifact returned with each search response.

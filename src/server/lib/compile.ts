@@ -1,5 +1,6 @@
 import { AIMessage } from "@langchain/core/messages";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { Match, pipe } from "effect";
 import { createAgent, toolStrategy } from "langchain";
 
 import type {
@@ -130,17 +131,15 @@ function createPlan(input: Omit<SearchPlan, "capability" | "outputMode">): Searc
   };
 }
 
-function normalizeFilterType(type: unknown) {
-  if (type === "appointment") {
-    return "encounter";
-  }
-
-  if (type === "condition" || type === "location" || type === "encounter") {
-    return type;
-  }
-
-  return null;
-}
+const normalizeFilterType = (type: unknown) =>
+  pipe(
+    Match.value(type),
+    Match.when("appointment", () => "encounter" as const),
+    Match.when("condition", () => "condition" as const),
+    Match.when("location", () => "location" as const),
+    Match.when("encounter", () => "encounter" as const),
+    Match.orElse(() => null),
+  );
 
 function sanitizeModelPayload(rawPayload: unknown) {
   if (!rawPayload || typeof rawPayload !== "object") {
@@ -193,30 +192,31 @@ function sanitizeModelPayload(rawPayload: unknown) {
   };
 }
 
-function normalizeModelPlan(plan: SearchPlan): SearchPlan {
-  if (plan.status === "ready") {
-    const hasCondition = plan.filters.some((filter) => filter.type === "condition");
-    const hasLocation = plan.filters.some((filter) => filter.type === "location");
+const normalizeModelPlan = (plan: SearchPlan): SearchPlan =>
+  pipe(
+    Match.value(plan.status),
+    Match.when("ready", () => {
+      const hasCondition = plan.filters.some((filter) => filter.type === "condition");
+      const hasLocation = plan.filters.some((filter) => filter.type === "location");
 
-    if (!hasCondition || !hasLocation) {
-      const missingFields = [
-        ...(!hasCondition ? ["condition"] : []),
-        ...(!hasLocation ? ["location"] : []),
-      ];
+      if (!hasCondition || !hasLocation) {
+        return {
+          ...plan,
+          status: "clarify" as const,
+          summary: undefined,
+          clarificationQuestion:
+            "I need at least a condition and a location before I run this encounter cohort search.",
+          missingFields: [
+            ...(!hasCondition ? ["condition"] : []),
+            ...(!hasLocation ? ["location"] : []),
+          ],
+        };
+      }
 
-      return {
-        ...plan,
-        status: "clarify",
-        summary: undefined,
-        clarificationQuestion:
-          "I need at least a condition and a location before I run this encounter cohort search.",
-        missingFields,
-      };
-    }
-  }
-
-  return plan;
-}
+      return plan;
+    }),
+    Match.orElse(() => plan),
+  );
 
 function buildAiUsage(
   model: string,

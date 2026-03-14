@@ -1,3 +1,5 @@
+import { Match, pipe } from "effect";
+
 import type {
   DemoSessionPreset,
   SearchFilter,
@@ -185,115 +187,53 @@ export function buildRequestEnvelope(
 /**
  * Produces deterministic demo latency values for each plan status.
  */
-export function formatLatency(planStatus: SearchPlan["status"]) {
-  if (planStatus === "deny") {
-    return 96;
-  }
+export const formatLatency = (planStatus: SearchPlan["status"]) =>
+  pipe(
+    Match.value(planStatus),
+    Match.when("deny", () => 96),
+    Match.when("clarify", () => 118),
+    Match.when("ready", () => 340),
+    Match.exhaustive,
+  );
 
-  if (planStatus === "clarify") {
-    return 118;
-  }
-
-  return 340;
+function receiveStep(prompt: string, detail: string): TraceStep {
+  return {
+    id: "receive",
+    title: "Receive natural language",
+    agent: "Manager agent",
+    agentTone: "purple",
+    description: `User typed: "${prompt}"`,
+    detail,
+    timeLabel: "0 ms",
+    state: "done",
+  };
 }
 
-/**
- * Builds the trace artifact rendered in the client flow panel.
- */
-export function buildTrace(prompt: string, plan: SearchPlan, totalResults: number): TraceStep[] {
-  if (plan.status === "deny") {
-    return [
-      {
-        id: "receive",
-        title: "Receive natural language",
-        agent: "Manager agent",
-        agentTone: "purple",
-        description: `User typed: "${prompt}"`,
-        detail: "The request is evaluated before retrieval begins.",
-        timeLabel: "0 ms",
-        state: "done",
-      },
-      {
-        id: "policy",
-        title: "Apply safety gate",
-        agent: "Manager agent",
-        agentTone: "coral",
-        description: plan.denialReason ?? "Request refused by safety policy.",
-        detail: "Unsupported medical-advice and instruction-override requests are blocked before any cohort search executes.",
-        timeLabel: "96 ms",
-        state: "active",
-      },
-    ];
-  }
+function parseStep(plan: SearchPlan, descriptionPrefix: string): TraceStep {
+  return {
+    id: "parse",
+    title: "Parse intent into SearchRequest",
+    agent: "Manager agent",
+    agentTone: "purple",
+    description: `${descriptionPrefix} ${plan.filters.length} ${plan.filters.length === 1 ? "filter" : "filters"}${plan.filters.length > 0 ? `: ${plan.filters.map((filter) => filter.type).join(", ")}` : ""}`,
+    detail: JSON.stringify(
+      { intent: plan.intent, filters: plan.filters, output_mode: plan.outputMode },
+      null,
+      2,
+    ),
+    timeLabel: "45 ms",
+    state: "done",
+  };
+}
 
-  if (plan.status === "clarify") {
-    return [
-      {
-        id: "receive",
-        title: "Receive natural language",
-        agent: "Manager agent",
-        agentTone: "purple",
-        description: `User typed: "${prompt}"`,
-        detail: "The request is inspected as entered, without rewriting the prompt.",
-        timeLabel: "0 ms",
-        state: "done",
-      },
-      {
-        id: "parse",
-        title: "Parse intent into SearchRequest",
-        agent: "Manager agent",
-        agentTone: "purple",
-        description: `Detected ${plan.filters.length} candidate filter${plan.filters.length === 1 ? "" : "s"}`,
-        detail: JSON.stringify({ intent: plan.intent, filters: plan.filters }, null, 2),
-        timeLabel: "45 ms",
-        state: "done",
-      },
-      {
-        id: "clarify",
-        title: "Request clarification",
-        agent: "Scope resolver",
-        agentTone: "teal",
-        description: plan.clarificationQuestion ?? "The query needs one more detail before retrieval.",
-        detail: `Missing fields: ${plan.missingFields.join(", ")}`,
-        timeLabel: "118 ms",
-        state: "active",
-      },
-    ];
-  }
-
+function buildSuccessTrace(prompt: string, plan: SearchPlan, totalResults: number): TraceStep[] {
   const encounterFilter = plan.filters.find((filter) => filter.type === "encounter");
   const locationFilter = plan.filters.find((filter) => filter.type === "location");
   const conditionFilter = plan.filters.find((filter) => filter.type === "condition");
 
   return [
-    {
-      id: "receive",
-      title: "Receive natural language",
-      agent: "Manager agent",
-      agentTone: "purple",
-      description: `User typed: "${prompt}"`,
-      detail: "Raw text passed to the manager agent. No preprocessing; the query remains intact.",
-      timeLabel: "0 ms",
-      state: "done",
-    },
-    {
-      id: "parse",
-      title: "Parse intent into SearchRequest",
-      agent: "Manager agent",
-      agentTone: "purple",
-      description: `Extracted ${plan.filters.length} filters: ${plan.filters.map((filter) => filter.type).join(", ")}`,
-      detail: JSON.stringify(
-        {
-          intent: plan.intent,
-          filters: plan.filters,
-          output_mode: plan.outputMode,
-        },
-        null,
-        2,
-      ),
-      timeLabel: "45 ms",
-      state: "done",
-    },
+    receiveStep(prompt, "Raw text passed to the manager agent. No preprocessing; the query remains intact."),
+    parseStep(plan, "Extracted"),
     {
       id: "terms",
       title: "Resolve clinical terms",
@@ -368,6 +308,43 @@ export function buildTrace(prompt: string, plan: SearchPlan, totalResults: numbe
 }
 
 /**
+ * Builds the trace artifact rendered in the client flow panel.
+ */
+export const buildTrace = (prompt: string, plan: SearchPlan, totalResults: number): TraceStep[] =>
+  pipe(
+    Match.value(plan.status),
+    Match.when("deny", () => [
+      receiveStep(prompt, "The request is evaluated before retrieval begins."),
+      {
+        id: "policy",
+        title: "Apply safety gate",
+        agent: "Manager agent",
+        agentTone: "coral" as const,
+        description: plan.denialReason ?? "Request refused by safety policy.",
+        detail: "Unsupported medical-advice and instruction-override requests are blocked before any cohort search executes.",
+        timeLabel: "96 ms",
+        state: "active" as const,
+      },
+    ]),
+    Match.when("clarify", () => [
+      receiveStep(prompt, "The request is inspected as entered, without rewriting the prompt."),
+      parseStep(plan, "Detected"),
+      {
+        id: "clarify",
+        title: "Request clarification",
+        agent: "Scope resolver",
+        agentTone: "teal" as const,
+        description: plan.clarificationQuestion ?? "The query needs one more detail before retrieval.",
+        detail: `Missing fields: ${plan.missingFields.join(", ")}`,
+        timeLabel: "118 ms",
+        state: "active" as const,
+      },
+    ]),
+    Match.when("ready", () => buildSuccessTrace(prompt, plan, totalResults)),
+    Match.exhaustive,
+  );
+
+/**
  * Applies a single search filter to a normalized public encounter record.
  */
 export function matchesFilter(record: PublicEncounterRecord, filter: SearchFilter) {
@@ -375,39 +352,38 @@ export function matchesFilter(record: PublicEncounterRecord, filter: SearchFilte
     (value): value is string => Boolean(value?.trim()),
   );
 
-  if (filter.type === "condition") {
-    return record.conditions.some(
-      (condition) =>
-        matchesCandidate(condition.label, searchValues) ||
-        matchesCandidate(condition.code, searchValues) ||
-        condition.aliases.some((alias) => matchesCandidate(alias, searchValues)),
-    );
-  }
+  return pipe(
+    Match.value(filter.type),
+    Match.when("condition", () =>
+      record.conditions.some(
+        (condition) =>
+          matchesCandidate(condition.label, searchValues) ||
+          matchesCandidate(condition.code, searchValues) ||
+          condition.aliases.some((alias) => matchesCandidate(alias, searchValues)),
+      ),
+    ),
+    Match.when("location", () => {
+      const normalizedSearchValues = new Set(
+        searchValues
+          .map((value) => normalizeSearchPhrase(value, true))
+          .filter(Boolean),
+      );
+      const normalizedLocationId = normalizeSearchPhrase(record.locationId, true);
 
-  if (filter.type === "location") {
-    const normalizedSearchValues = new Set(
-      searchValues
-        .map((value) => normalizeSearchPhrase(value, true))
-        .filter(Boolean),
-    );
-    const normalizedLocationId = normalizeSearchPhrase(record.locationId, true);
-
-    return (
-      matchesTokenSequence(record.locationName, searchValues, {
-        stripFillers: true,
-        allowInitialism: true,
-      }) ||
-      normalizedSearchValues.has(normalizedLocationId) ||
-      matchesTokenSequence(record.organizationName, searchValues, {
-        stripFillers: true,
-        allowInitialism: true,
-        minimumSearchTokens: 2,
-      })
-    );
-  }
-
-  if (filter.type === "encounter") {
-    return (
+      return (
+        matchesTokenSequence(record.locationName, searchValues, {
+          stripFillers: true,
+          allowInitialism: true,
+        }) ||
+        normalizedSearchValues.has(normalizedLocationId) ||
+        matchesTokenSequence(record.organizationName, searchValues, {
+          stripFillers: true,
+          allowInitialism: true,
+          minimumSearchTokens: 2,
+        })
+      );
+    }),
+    Match.when("encounter", () =>
       matchesTokenSequence(record.encounterClass, searchValues, {
         stripFillers: true,
         ignoredTokens: ENCOUNTER_NOISE_TOKENS,
@@ -415,11 +391,10 @@ export function matchesFilter(record: PublicEncounterRecord, filter: SearchFilte
       matchesTokenSequence(record.encounterService, searchValues, {
         stripFillers: true,
         ignoredTokens: ENCOUNTER_NOISE_TOKENS,
-      })
-    );
-  }
-
-  return true;
+      }),
+    ),
+    Match.exhaustive,
+  );
 }
 
 /**
