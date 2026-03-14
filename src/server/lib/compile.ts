@@ -1,7 +1,7 @@
 import { AIMessage } from "@langchain/core/messages";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { Match, pipe } from "effect";
-import { createAgent, toolStrategy } from "langchain";
+import { createAgent } from "langchain";
 
 import type {
   AiUsage,
@@ -59,7 +59,7 @@ const SEARCH_PLAN_JSON_SCHEMA = {
     },
   },
   required: ["intent", "status", "filters", "missingFields"],
-} as const;
+};
 const SYSTEM_PROMPT = `You compile provider-side encounter search prompts into a typed search plan.
 
 Rules:
@@ -352,8 +352,9 @@ export async function compileSearchPlan(prompt: string, context: CompileContext)
       const agent = createAgent({
         model: llm,
         tools: [],
-        prompt: SYSTEM_PROMPT,
-        responseFormat: toolStrategy(SEARCH_PLAN_JSON_SCHEMA, { handleError: false }),
+        systemPrompt: SYSTEM_PROMPT,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- JsonSchemaFormat is not exported from langchain
+        responseFormat: SEARCH_PLAN_JSON_SCHEMA as any,
       });
 
       const result = await agent.invoke(
