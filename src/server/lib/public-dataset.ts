@@ -63,9 +63,9 @@ function buildExplanations(record: PublicEncounterRecord, plan: SearchPlan): Sea
 }
 
 function buildBadges(record: PublicEncounterRecord): SearchMatch["badges"] {
-  return record.badges.map((badge, index) => ({
+  return record.badges.map((badge) => ({
     label: truncateLabel(badge.label),
-    tone: index === 2 && badge.tone === "green" ? "amber" : badge.tone,
+    tone: badge.tone,
   }));
 }
 

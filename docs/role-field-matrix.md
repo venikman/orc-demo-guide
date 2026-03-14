@@ -22,4 +22,4 @@ The provider-side copilot enforces field visibility at runtime before any result
 
 ## Enforcement Note
 
-This matrix is enforced server-side in `/Users/stas-studio/Developer/orc-demo-guide/src/server/lib/field-visibility.ts`. Results are redacted or stripped before the API response is returned.
+This matrix is enforced server-side in `src/server/lib/field-visibility.ts`. Results are redacted or stripped before the API response is returned.

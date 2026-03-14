@@ -5,7 +5,7 @@ export const MIMIC_DEMO_INDEX = {
   "datasetLabel": "MIMIC-IV Clinical Database Demo on FHIR v2.1.0",
   "sourceVersion": "2.1.0",
   "sourceBaseUrl": "https://physionet.org/files/mimic-iv-fhir-demo/2.1.0/fhir",
-  "generatedAt": "2026-03-14T13:40:42.509Z",
+  "generatedAt": "2026-03-14T14:30:48.900Z",
   "defaultQuery": "Patients with diabetes in the Emergency Department",
   "defaultFilters": {
     "condition": "diabetes",
@@ -2797,7 +2797,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic chronic kidney disease",
             "e1122",
             "diabetes",
+            "diabetes mellitus",
+            "dm",
             "type 2 diabetes",
+            "type 2 dm",
+            "t2dm",
             "kidney disease"
           ]
         },
@@ -2808,7 +2812,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with foot ulcer",
             "e11621",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -3170,7 +3178,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic chronic kidney disease",
             "e1122",
             "diabetes",
+            "diabetes mellitus",
+            "dm",
             "type 2 diabetes",
+            "type 2 dm",
+            "t2dm",
             "kidney disease"
           ]
         },
@@ -3181,7 +3193,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic peripheral angiopathy without gangrene",
             "e1151",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -3191,7 +3207,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic polyneuropathy",
             "e1142",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -3358,7 +3378,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic chronic kidney disease",
             "e1122",
             "diabetes",
+            "diabetes mellitus",
+            "dm",
             "type 2 diabetes",
+            "type 2 dm",
+            "t2dm",
             "kidney disease"
           ]
         },
@@ -3369,7 +3393,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic peripheral angiopathy without gangrene",
             "e1151",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -3379,7 +3407,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic polyneuropathy",
             "e1142",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -3572,7 +3604,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic chronic kidney disease",
             "e1122",
             "diabetes",
+            "diabetes mellitus",
+            "dm",
             "type 2 diabetes",
+            "type 2 dm",
+            "t2dm",
             "kidney disease"
           ]
         },
@@ -3583,7 +3619,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic nephropathy",
             "e1121",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -3874,7 +3914,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic chronic kidney disease",
             "e1122",
             "diabetes",
+            "diabetes mellitus",
+            "dm",
             "type 2 diabetes",
+            "type 2 dm",
+            "t2dm",
             "kidney disease"
           ]
         },
@@ -3885,7 +3929,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic neuropathy unspecified",
             "e1140",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -3895,7 +3943,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic peripheral angiopathy with gangrene",
             "e1152",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -3905,7 +3957,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with foot ulcer",
             "e11621",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -3915,7 +3971,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with hyperglycemia",
             "e1165",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -3925,7 +3985,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with other specified complication",
             "e1169",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -4143,7 +4207,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic chronic kidney disease",
             "e1122",
             "diabetes",
+            "diabetes mellitus",
+            "dm",
             "type 2 diabetes",
+            "type 2 dm",
+            "t2dm",
             "kidney disease"
           ]
         },
@@ -4154,7 +4222,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic neuropathy unspecified",
             "e1140",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -4164,7 +4236,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with foot ulcer",
             "e11621",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -4174,7 +4250,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with hyperglycemia",
             "e1165",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -4309,7 +4389,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic nephropathy",
             "e1121",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -4319,7 +4403,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic neuropathy unspecified",
             "e1140",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -4329,7 +4417,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with foot ulcer",
             "e11621",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -4339,7 +4431,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with hyperglycemia",
             "e1165",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -4502,7 +4598,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -4670,7 +4770,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -4771,7 +4875,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes with neurological manifestations type ii or unspecified type uncontrolled",
             "25062",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -4781,7 +4889,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes with other specified manifestations type ii or unspecified type uncontrolled",
             "25082",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -4863,7 +4975,9 @@ export const MIMIC_DEMO_INDEX = {
           "aliases": [
             "polyneuropathy in diabetes",
             "3572",
-            "diabetes"
+            "diabetes",
+            "diabetes mellitus",
+            "dm"
           ]
         },
         {
@@ -4995,7 +5109,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes with neurological manifestations type ii or unspecified type uncontrolled",
             "25062",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -5005,7 +5123,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes with other specified manifestations type ii or unspecified type uncontrolled",
             "25082",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -5014,7 +5136,9 @@ export const MIMIC_DEMO_INDEX = {
           "aliases": [
             "family history of diabetes mellitus",
             "v180",
-            "diabetes"
+            "diabetes",
+            "diabetes mellitus",
+            "dm"
           ]
         },
         {
@@ -5176,7 +5300,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes with neurological manifestations type ii or unspecified type not stated as uncontrolled",
             "25060",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -5186,7 +5314,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes with other specified manifestations type ii or unspecified type not stated as uncontrolled",
             "25080",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -5322,7 +5454,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes with neurological manifestations type ii or unspecified type uncontrolled",
             "25062",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -5388,7 +5524,9 @@ export const MIMIC_DEMO_INDEX = {
           "aliases": [
             "polyneuropathy in diabetes",
             "3572",
-            "diabetes"
+            "diabetes",
+            "diabetes mellitus",
+            "dm"
           ]
         },
         {
@@ -5482,7 +5620,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -6585,7 +6727,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes with ketoacidosis type ii or unspecified type uncontrolled",
             "25012",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -6595,7 +6741,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes with neurological manifestations type ii or unspecified type uncontrolled",
             "25062",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -6620,7 +6770,9 @@ export const MIMIC_DEMO_INDEX = {
           "aliases": [
             "polyneuropathy in diabetes",
             "3572",
-            "diabetes"
+            "diabetes",
+            "diabetes mellitus",
+            "dm"
           ]
         },
         {
@@ -6799,7 +6951,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -7077,7 +7233,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -7683,7 +7843,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -7899,7 +8063,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with hyperglycemia",
             "e1165",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -9156,7 +9324,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type uncontrolled",
             "25002",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -9464,7 +9636,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type uncontrolled",
             "25002",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -9680,7 +9856,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes with ketoacidosis type ii or unspecified type uncontrolled",
             "25012",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -9909,7 +10089,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -10151,7 +10335,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -10329,7 +10517,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -10594,7 +10786,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -10738,7 +10934,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -10988,7 +11188,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -11100,7 +11304,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes with other specified manifestations type ii or unspecified type not stated as uncontrolled",
             "25080",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -11305,7 +11513,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes with hyperosmolarity type ii or unspecified type uncontrolled",
             "25022",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -11646,7 +11858,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic chronic kidney disease",
             "e1122",
             "diabetes",
+            "diabetes mellitus",
+            "dm",
             "type 2 diabetes",
+            "type 2 dm",
+            "t2dm",
             "kidney disease"
           ]
         },
@@ -11965,7 +12181,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -12214,7 +12434,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic chronic kidney disease",
             "e1122",
             "diabetes",
+            "diabetes mellitus",
+            "dm",
             "type 2 diabetes",
+            "type 2 dm",
+            "t2dm",
             "kidney disease"
           ]
         },
@@ -12225,7 +12449,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with hypoglycemia without coma",
             "e11649",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -12566,7 +12794,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -12872,7 +13104,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic chronic kidney disease",
             "e1122",
             "diabetes",
+            "diabetes mellitus",
+            "dm",
             "type 2 diabetes",
+            "type 2 dm",
+            "t2dm",
             "kidney disease"
           ]
         },
@@ -13170,7 +13406,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -13377,7 +13617,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -13796,7 +14040,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -16587,7 +16835,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -16957,7 +17209,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes with ketoacidosis type ii or unspecified type uncontrolled",
             "25012",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -17835,7 +18091,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -19184,7 +19444,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -19559,7 +19823,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -19813,7 +20081,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -20013,7 +20285,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -20293,7 +20569,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -21047,7 +21327,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes with ophthalmic manifestations type ii or unspecified type not stated as uncontrolled",
             "25050",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -21314,7 +21598,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -21580,7 +21868,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -21724,7 +22016,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type uncontrolled",
             "25002",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -21912,7 +22208,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -21993,7 +22293,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -22125,7 +22429,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -22309,7 +22617,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -22700,7 +23012,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic polyneuropathy",
             "e1142",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -23050,7 +23366,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic polyneuropathy",
             "e1142",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -23429,7 +23749,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic chronic kidney disease",
             "e1122",
             "diabetes",
+            "diabetes mellitus",
+            "dm",
             "type 2 diabetes",
+            "type 2 dm",
+            "t2dm",
             "kidney disease"
           ]
         },
@@ -23440,7 +23764,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic polyneuropathy",
             "e1142",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -23450,7 +23778,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with hyperglycemia",
             "e1165",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -23624,7 +23956,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -24028,7 +24364,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic polyneuropathy",
             "e1142",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -24038,7 +24378,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with hypoglycemia without coma",
             "e11649",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -24698,7 +25042,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic polyneuropathy",
             "e1142",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -24708,7 +25056,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with hyperglycemia",
             "e1165",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -25113,7 +25465,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with hyperglycemia",
             "e1165",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -25288,7 +25644,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -25498,7 +25858,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -25817,7 +26181,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -26135,7 +26503,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic polyneuropathy",
             "e1142",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -26417,7 +26789,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -26651,7 +27027,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with hyperglycemia",
             "e1165",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -26661,7 +27041,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -26905,7 +27289,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic polyneuropathy",
             "e1142",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -26915,7 +27303,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with hypoglycemia without coma",
             "e11649",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -27173,7 +27565,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic polyneuropathy",
             "e1142",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -27450,7 +27846,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic cataract",
             "e1136",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -27460,7 +27860,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with hypoglycemia without coma",
             "e11649",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -28330,7 +28734,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic chronic kidney disease",
             "e1122",
             "diabetes",
+            "diabetes mellitus",
+            "dm",
             "type 2 diabetes",
+            "type 2 dm",
+            "t2dm",
             "kidney disease"
           ]
         },
@@ -28341,7 +28749,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic peripheral angiopathy with gangrene",
             "e1152",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -28351,7 +28763,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with foot ulcer",
             "e11621",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -28902,7 +29318,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic chronic kidney disease",
             "e1122",
             "diabetes",
+            "diabetes mellitus",
+            "dm",
             "type 2 diabetes",
+            "type 2 dm",
+            "t2dm",
             "kidney disease"
           ]
         },
@@ -28913,7 +29333,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with foot ulcer",
             "e11621",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -28923,7 +29347,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with hypoglycemia without coma",
             "e11649",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -29333,7 +29761,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic chronic kidney disease",
             "e1122",
             "diabetes",
+            "diabetes mellitus",
+            "dm",
             "type 2 diabetes",
+            "type 2 dm",
+            "t2dm",
             "kidney disease"
           ]
         },
@@ -29344,7 +29776,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic peripheral angiopathy with gangrene",
             "e1152",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -29354,7 +29790,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with foot ulcer",
             "e11621",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -29364,7 +29804,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with hypoglycemia without coma",
             "e11649",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -29374,7 +29818,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with other skin complications",
             "e11628",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -29384,7 +29832,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with other skin ulcer",
             "e11622",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -29647,7 +30099,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic cataract",
             "e1136",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -29919,7 +30375,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic cataract",
             "e1136",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -29929,7 +30389,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic nephropathy",
             "e1121",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -30240,7 +30704,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic chronic kidney disease",
             "e1122",
             "diabetes",
+            "diabetes mellitus",
+            "dm",
             "type 2 diabetes",
+            "type 2 dm",
+            "t2dm",
             "kidney disease"
           ]
         },
@@ -30464,7 +30932,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -30774,7 +31246,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic chronic kidney disease",
             "e1122",
             "diabetes",
+            "diabetes mellitus",
+            "dm",
             "type 2 diabetes",
+            "type 2 dm",
+            "t2dm",
             "kidney disease"
           ]
         },
@@ -31087,7 +31563,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic chronic kidney disease",
             "e1122",
             "diabetes",
+            "diabetes mellitus",
+            "dm",
             "type 2 diabetes",
+            "type 2 dm",
+            "t2dm",
             "kidney disease"
           ]
         },
@@ -31293,7 +31773,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -31463,7 +31947,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -31742,7 +32230,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -31829,7 +32321,9 @@ export const MIMIC_DEMO_INDEX = {
           "aliases": [
             "diabetes mellitus due to underlying condition with hyperglycemia",
             "e0865",
-            "diabetes"
+            "diabetes",
+            "diabetes mellitus",
+            "dm"
           ]
         },
         {
@@ -32258,7 +32752,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -32588,7 +33086,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -32900,7 +33402,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes with renal manifestations type ii or unspecified type not stated as uncontrolled",
             "25040",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -33216,7 +33722,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes with renal manifestations type ii or unspecified type not stated as uncontrolled",
             "25040",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -33507,7 +34017,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -34565,7 +35079,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -34749,7 +35267,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -35035,7 +35557,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -35300,7 +35826,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -35453,7 +35983,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -35906,7 +36440,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -36952,7 +37490,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with unspecified complications",
             "e118",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -37107,7 +37649,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with hyperglycemia",
             "e1165",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -37267,7 +37813,9 @@ export const MIMIC_DEMO_INDEX = {
           "aliases": [
             "type 1 diabetes mellitus with ketoacidosis without coma",
             "e1010",
-            "diabetes"
+            "diabetes",
+            "diabetes mellitus",
+            "dm"
           ]
         },
         {
@@ -39036,7 +39584,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -41418,7 +41970,9 @@ export const MIMIC_DEMO_INDEX = {
           "aliases": [
             "secondary diabetes mellitus without mention of complication not stated as uncontrolled or unspecified",
             "24900",
-            "diabetes"
+            "diabetes",
+            "diabetes mellitus",
+            "dm"
           ]
         },
         {
@@ -41541,7 +42095,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -41708,7 +42266,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -41906,7 +42468,9 @@ export const MIMIC_DEMO_INDEX = {
           "aliases": [
             "secondary diabetes mellitus without mention of complication not stated as uncontrolled or unspecified",
             "24900",
-            "diabetes"
+            "diabetes",
+            "diabetes mellitus",
+            "dm"
           ]
         },
         {
@@ -42142,7 +42706,9 @@ export const MIMIC_DEMO_INDEX = {
           "aliases": [
             "secondary diabetes mellitus without mention of complication not stated as uncontrolled or unspecified",
             "24900",
-            "diabetes"
+            "diabetes",
+            "diabetes mellitus",
+            "dm"
           ]
         },
         {
@@ -42535,7 +43101,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with hypoglycemia without coma",
             "e11649",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -42812,7 +43382,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -44124,7 +44698,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus without complications",
             "e119",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         }
       ],
@@ -44364,7 +44942,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -45535,7 +46117,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -46604,7 +47190,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -47278,7 +47868,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic polyneuropathy",
             "e1142",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -47288,7 +47882,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with foot ulcer",
             "e11621",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -47413,7 +48011,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type uncontrolled",
             "25002",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -48367,7 +48969,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -48778,7 +49384,11 @@ export const MIMIC_DEMO_INDEX = {
             "type 2 diabetes mellitus with diabetic chronic kidney disease",
             "e1122",
             "diabetes",
+            "diabetes mellitus",
+            "dm",
             "type 2 diabetes",
+            "type 2 dm",
+            "t2dm",
             "kidney disease"
           ]
         },
@@ -50659,7 +51269,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type not stated as uncontrolled",
             "25000",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {
@@ -50943,7 +51557,11 @@ export const MIMIC_DEMO_INDEX = {
             "diabetes mellitus without mention of complication type ii or unspecified type uncontrolled",
             "25002",
             "diabetes",
-            "type 2 diabetes"
+            "diabetes mellitus",
+            "dm",
+            "type 2 diabetes",
+            "type 2 dm",
+            "t2dm"
           ]
         },
         {

@@ -1,4 +1,4 @@
-# AI Provider Member Search Copilot — Runtime Rules
+# AI Provider Encounter Search Copilot — Runtime Rules
 
 This file defines runtime application behavior only.
 
@@ -11,7 +11,7 @@ It does **not** define:
 
 ## Mission
 
-Provide a provider-side copilot for authorized `admin`, `nurse`, and `provider` users to search for members/patients with natural language and receive explainable, policy-filtered results.
+Provide a provider-side copilot for authorized `admin`, `nurse`, and `provider` users to search de-identified encounter cohorts with natural language and receive explainable, policy-filtered results.
 
 Phase 1 is read-only only.
 
@@ -34,8 +34,8 @@ Phase 1 is read-only only.
 
 ## Runtime Safety Rules
 
-- No PHI in logs, screenshots, error messages, or synthetic fixtures.
-- Synthetic data only in development and test environments.
+- No PHI in logs, screenshots, error messages, or generated dataset artifacts.
+- Runtime retrieval uses only the checked-in de-identified public FHIR snapshot unless explicitly replaced with a real integration.
 - Safety modules must short-circuit before or after the LLM when present.
 - No write-back paths in v1.
 - No scope expansion without an explicit recorded decision.
@@ -69,11 +69,11 @@ The runtime must enforce trusted requester context, purpose of use, effective sc
 |---|---|---|---|
 | name | visible | visible | visible |
 | dob | redacted | visible | visible |
-| mrn | visible | visible | visible |
+| patientIdentifier | visible | visible | visible |
 | conditions | hidden | visible | visible |
-| payer | visible | redacted | visible |
-| appointmentLabel | visible | visible | visible |
-| provider | visible | visible | visible |
+| organizationName | visible | visible | visible |
+| locationName | visible | visible | visible |
+| encounterLabel | visible | visible | visible |
 | explanations | visible | visible | visible |
 
 Runtime behavior:
@@ -82,6 +82,6 @@ Runtime behavior:
 
 ## Runtime Data Rules
 
-- Synthetic member data is allowed for prototype environments.
-- No real PHI may be introduced into fixtures, logs, screenshots, or error output.
-- External adapter stubs must use synthetic data unless explicitly replaced with real integrations.
+- The prototype runtime reads from a versioned local snapshot of the public de-identified MIMIC-IV FHIR demo dataset.
+- No real PHI may be introduced into the snapshot, logs, screenshots, or error output.
+- Search requests do not fetch external clinical data at runtime; retrieval executes against the local normalized index only.

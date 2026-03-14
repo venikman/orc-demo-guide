@@ -32,6 +32,7 @@ export const PUBLIC_DATASET_LOCATIONS = [
   "Trauma SICU (TSICU)",
   "Vascular"
 ] as const;
+export type PublicDatasetLocation = (typeof PUBLIC_DATASET_LOCATIONS)[number];
 export const PUBLIC_DATASET_ORGANIZATIONS = [
   "Beth Israel Deaconess Medical Center"
 ] as const;

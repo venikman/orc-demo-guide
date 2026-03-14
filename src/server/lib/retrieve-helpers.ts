@@ -9,6 +9,46 @@ import type { PublicEncounterRecord } from "./public-dataset";
 
 export const SOURCE_COUNT = 5;
 export const PREVIEW_COUNT = 3;
+const FILLER_TOKENS = new Set(["a", "an", "at", "for", "in", "of", "on", "the", "to"]);
+
+function normalizeText(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function normalizeSearchPhrase(value: string, stripFillers = false) {
+  const tokens = normalizeText(value)
+    .split(" ")
+    .filter(Boolean);
+
+  return (stripFillers ? tokens.filter((token) => !FILLER_TOKENS.has(token)) : tokens).join(" ");
+}
+
+function matchesCandidate(
+  candidate: string | null | undefined,
+  searchValues: string[],
+  stripFillers = false,
+) {
+  if (!candidate) {
+    return false;
+  }
+
+  const normalizedCandidate = normalizeSearchPhrase(candidate, stripFillers);
+  if (!normalizedCandidate) {
+    return false;
+  }
+
+  return searchValues.some((searchValue) => {
+    const normalizedSearch = normalizeSearchPhrase(searchValue, stripFillers);
+    if (!normalizedSearch) {
+      return false;
+    }
+
+    return (
+      normalizedCandidate.includes(normalizedSearch) ||
+      normalizedSearch.includes(normalizedCandidate)
+    );
+  });
+}
 
 /**
  * Creates the typed request envelope used by deterministic retrieval.
@@ -224,30 +264,32 @@ export function buildTrace(prompt: string, plan: SearchPlan, totalResults: numbe
  * Applies a single search filter to a normalized public encounter record.
  */
 export function matchesFilter(record: PublicEncounterRecord, filter: SearchFilter) {
-  const lowerValue = filter.value.toLowerCase();
+  const searchValues = [filter.canonicalValue, filter.value].filter(
+    (value): value is string => Boolean(value?.trim()),
+  );
 
   if (filter.type === "condition") {
     return record.conditions.some(
       (condition) =>
-        condition.label.toLowerCase().includes(lowerValue) ||
-        condition.code?.toLowerCase().includes(lowerValue) ||
-        condition.aliases.some((alias) => alias.toLowerCase().includes(lowerValue)),
+        matchesCandidate(condition.label, searchValues) ||
+        matchesCandidate(condition.code, searchValues) ||
+        condition.aliases.some((alias) => matchesCandidate(alias, searchValues)),
     );
   }
 
   if (filter.type === "location") {
     return (
-      record.locationName.toLowerCase().includes(lowerValue) ||
-      (record.locationId?.toLowerCase().includes(lowerValue) ?? false) ||
-      record.organizationName.toLowerCase().includes(lowerValue)
+      matchesCandidate(record.locationName, searchValues, true) ||
+      matchesCandidate(record.locationId, searchValues, true) ||
+      matchesCandidate(record.organizationName, searchValues, true)
     );
   }
 
   if (filter.type === "encounter") {
     return (
-      record.encounterLabel.toLowerCase().includes(lowerValue) ||
-      (record.encounterClass?.toLowerCase().includes(lowerValue) ?? false) ||
-      (record.encounterService?.toLowerCase().includes(lowerValue) ?? false)
+      matchesCandidate(record.encounterLabel, searchValues) ||
+      matchesCandidate(record.encounterClass, searchValues) ||
+      matchesCandidate(record.encounterService, searchValues)
     );
   }
 

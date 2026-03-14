@@ -198,6 +198,7 @@ export function App() {
     }
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- boot from the canonical dataset query once on mount.
   useEffect(() => {
     void runSearch(DEFAULT_QUERY);
   }, []);

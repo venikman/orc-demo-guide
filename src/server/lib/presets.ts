@@ -2,6 +2,7 @@ import type { DemoSessionPreset, PresetId } from "../../../validation-schema";
 import {
   PUBLIC_DATASET_LOCATIONS,
   PUBLIC_DATASET_ORGANIZATIONS,
+  type PublicDatasetLocation,
 } from "../../shared/public-dataset-meta";
 
 const PROVIDER_LOCATIONS = [
@@ -10,7 +11,7 @@ const PROVIDER_LOCATIONS = [
   "Medicine",
   "Medicine/Cardiology",
   "Trauma SICU (TSICU)",
-];
+] satisfies PublicDatasetLocation[];
 
 const NURSE_LOCATIONS = [
   "Emergency Department",
@@ -20,7 +21,7 @@ const NURSE_LOCATIONS = [
   "Medicine/Cardiology",
   "Neurology",
   "Hematology/Oncology",
-];
+] satisfies PublicDatasetLocation[];
 
 const PRESETS: Record<PresetId, DemoSessionPreset> = {
   admin: {
