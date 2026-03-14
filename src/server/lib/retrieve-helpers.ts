@@ -1,13 +1,13 @@
 import type {
   DemoSessionPreset,
   SearchFilter,
-  SearchMatch,
   SearchPlan,
   SearchRequestEnvelope,
   TraceStep,
 } from "../../../validation-schema";
+import type { PublicEncounterRecord } from "./public-dataset";
 
-export const SOURCE_COUNT = 3;
+export const SOURCE_COUNT = 5;
 export const PREVIEW_COUNT = 3;
 
 /**
@@ -124,7 +124,7 @@ export function buildTrace(prompt: string, plan: SearchPlan, totalResults: numbe
     ];
   }
 
-  const appointmentFilter = plan.filters.find((filter) => filter.type === "appointment");
+  const encounterFilter = plan.filters.find((filter) => filter.type === "encounter");
   const locationFilter = plan.filters.find((filter) => filter.type === "location");
   const conditionFilter = plan.filters.find((filter) => filter.type === "condition");
 
@@ -162,8 +162,8 @@ export function buildTrace(prompt: string, plan: SearchPlan, totalResults: numbe
       title: "Resolve clinical terms",
       agent: "Term resolver",
       agentTone: "teal",
-      description: `"${conditionFilter?.value ?? "condition"}" mapped to an approved concept set`,
-      detail: `"${conditionFilter?.value ?? "condition"}" -> concept_set from the approved diabetes map. Unsupported terms trigger clarification instead of approximation.`,
+      description: `"${conditionFilter?.value ?? "condition"}" mapped to public diagnosis codes`,
+      detail: `Condition text is matched against de-identified diagnosis labels and ICD codes from the public FHIR snapshot.`,
       timeLabel: "82 ms",
       state: "done",
     },
@@ -172,8 +172,8 @@ export function buildTrace(prompt: string, plan: SearchPlan, totalResults: numbe
       title: "Resolve scope",
       agent: "Scope resolver",
       agentTone: "teal",
-      description: `"${locationFilter?.value ?? "location"}" resolved within the preset's allowed clinic scope`,
-      detail: `Trusted preset scope is intersected with the requested location before retrieval. Appointment window: ${appointmentFilter?.value ?? "n/a"}.`,
+      description: `"${locationFilter?.value ?? "location"}" resolved within the preset's allowed encounter scope`,
+      detail: `Trusted role scope is intersected with the requested FHIR location before retrieval. Encounter detail: ${encounterFilter?.value ?? "not requested"}.`,
       timeLabel: "91 ms",
       state: "done",
     },
@@ -182,7 +182,7 @@ export function buildTrace(prompt: string, plan: SearchPlan, totalResults: numbe
       title: "Execute deterministic retrieval",
       agent: "Query engine",
       agentTone: "blue",
-      description: `Person index queried with all active filters intersected, returned ${totalResults} matches`,
+      description: `Encounter index queried with all active filters intersected, returned ${totalResults} matches`,
       detail: "The retrieval engine performs set intersection only. The LLM does not decide membership.",
       timeLabel: "240 ms",
       state: "done",
@@ -192,8 +192,8 @@ export function buildTrace(prompt: string, plan: SearchPlan, totalResults: numbe
       title: "Validate evidence",
       agent: "Explanation builder",
       agentTone: "coral",
-      description: `${totalResults}/${totalResults} results retained after evidence and freshness checks`,
-      detail: "Each result is checked for visible evidence, appointment freshness, and source provenance labels.",
+      description: `${totalResults}/${totalResults} results retained after evidence and provenance checks`,
+      detail: "Each result is checked for visible de-identified evidence, encounter provenance, and source labels.",
       timeLabel: "305 ms",
       state: "done",
     },
@@ -207,7 +207,7 @@ export function buildTrace(prompt: string, plan: SearchPlan, totalResults: numbe
         {
           interpreted_intent: plan.intent,
           filters_applied: plan.filters.length,
-          sources_used: ["EHR", "Scheduling", "Payer"],
+          sources_used: ["Patient", "Condition", "Encounter", "Location", "Organization"],
           match_count: totalResults,
           confidence: "high",
         },
@@ -221,56 +221,46 @@ export function buildTrace(prompt: string, plan: SearchPlan, totalResults: numbe
 }
 
 /**
- * Applies a single search filter to a member card.
+ * Applies a single search filter to a normalized public encounter record.
  */
-export function matchesFilter(match: SearchMatch, filter: SearchFilter) {
+export function matchesFilter(record: PublicEncounterRecord, filter: SearchFilter) {
   const lowerValue = filter.value.toLowerCase();
-  const locationAliases: Record<string, string[]> = {
-    "site-4021": ["springfield clinic", "springfield", "springfield family medicine"],
-    "site-1108": ["north campus", "north campus primary care", "north clinic"],
-  };
 
   if (filter.type === "condition") {
-    return (match.conditions ?? []).some(
+    return record.conditions.some(
       (condition) =>
         condition.label.toLowerCase().includes(lowerValue) ||
-        condition.code.toLowerCase().includes(lowerValue) ||
+        condition.code?.toLowerCase().includes(lowerValue) ||
         condition.aliases.some((alias) => alias.toLowerCase().includes(lowerValue)),
     );
   }
 
   if (filter.type === "location") {
     return (
-      match.siteName.toLowerCase().includes(lowerValue) ||
-      match.siteId.toLowerCase().includes(lowerValue) ||
-      (locationAliases[match.siteId] ?? []).some(
-        (alias) => alias.includes(lowerValue) || lowerValue.includes(alias),
-      )
+      record.locationName.toLowerCase().includes(lowerValue) ||
+      (record.locationId?.toLowerCase().includes(lowerValue) ?? false) ||
+      record.organizationName.toLowerCase().includes(lowerValue)
     );
   }
 
-  if (filter.type === "appointment") {
-    return match.appointmentLabel.toLowerCase().includes(lowerValue) || lowerValue === "next tuesday";
-  }
-
-  if (filter.type === "payer") {
-    return match.payer.toLowerCase().includes(lowerValue);
-  }
-
-  if (filter.type === "panel") {
-    return match.provider.toLowerCase().includes(lowerValue);
+  if (filter.type === "encounter") {
+    return (
+      record.encounterLabel.toLowerCase().includes(lowerValue) ||
+      (record.encounterClass?.toLowerCase().includes(lowerValue) ?? false) ||
+      (record.encounterService?.toLowerCase().includes(lowerValue) ?? false)
+    );
   }
 
   return true;
 }
 
 /**
- * Restricts synthetic matches to the preset's allowed sites and providers.
+ * Restricts normalized encounter records to the preset's allowed organizations and locations.
  */
-export function enforcePresetScope(matches: SearchMatch[], preset: DemoSessionPreset) {
-  return matches.filter(
-    (match) =>
-      preset.allowedSiteIds.includes(match.siteId) &&
-      preset.allowedProviders.includes(match.provider),
+export function enforcePresetScope(records: PublicEncounterRecord[], preset: DemoSessionPreset) {
+  return records.filter(
+    (record) =>
+      preset.allowedOrganizationNames.includes(record.organizationName) &&
+      preset.allowedLocationNames.includes(record.locationName),
   );
 }

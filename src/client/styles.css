@@ -110,6 +110,8 @@ button {
   margin-left: auto;
   font-size: 15px;
   color: var(--text-tertiary);
+  max-width: 48%;
+  text-align: right;
 }
 
 .dot {
@@ -487,6 +489,11 @@ button {
   color: var(--text-secondary);
 }
 
+.rc-meta-secondary {
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
 .rc-badges {
   margin-left: auto;
   display: flex;
@@ -630,8 +637,16 @@ button {
     font-size: 18px;
   }
 
+  .topbar {
+    flex-wrap: wrap;
+  }
+
   .topbar-sub {
     font-size: 13px;
+    max-width: 100%;
+    width: 100%;
+    margin-left: 0;
+    text-align: left;
   }
 
   .search-row {

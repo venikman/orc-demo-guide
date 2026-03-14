@@ -6,11 +6,7 @@ export type PresetId = z.infer<typeof presetIdSchema>;
 export const filterTypeSchema = z.enum([
   "condition",
   "location",
-  "appointment",
-  "payer",
-  "coverage",
-  "pa_status",
-  "panel",
+  "encounter",
 ]);
 export type FilterType = z.infer<typeof filterTypeSchema>;
 
@@ -54,8 +50,8 @@ export type DemoSessionPreset = {
   purpose_of_use: "treatment" | "operations";
   smart_scopes: string[];
   field_visibility_profile_id: string;
-  allowedSiteIds: string[];
-  allowedProviders: string[];
+  allowedOrganizationNames: string[];
+  allowedLocationNames: string[];
 };
 
 export type SearchRequestEnvelope = {
@@ -99,18 +95,16 @@ export type SearchMatch = {
   initials: string;
   name: string;
   dob: string;
-  mrn: string;
-  siteId: string;
-  siteName: string;
-  provider: string;
-  payer: string;
+  patientIdentifier: string;
+  organizationName: string;
+  locationId: string;
+  locationName: string;
   conditions?: Array<{
     label: string;
     code: string;
     aliases: string[];
   }>;
-  appointmentLabel: string;
-  appointmentIso: string;
+  encounterLabel: string;
   badges: Array<{
     label: string;
     tone: "green" | "amber" | "blue";

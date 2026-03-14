@@ -7,42 +7,42 @@ type UserRole = "admin" | "nurse" | "provider";
 type VisibleField =
   | "name"
   | "dob"
-  | "mrn"
+  | "patientIdentifier"
   | "conditions"
-  | "payer"
-  | "appointmentLabel"
-  | "provider"
+  | "organizationName"
+  | "locationName"
+  | "encounterLabel"
   | "explanations";
 
 const FIELD_VISIBILITY_MATRIX: Record<UserRole, Record<VisibleField, FieldVisibilityState>> = {
   admin: {
     name: "visible",
     dob: "redacted",
-    mrn: "visible",
+    patientIdentifier: "visible",
     conditions: "hidden",
-    payer: "visible",
-    appointmentLabel: "visible",
-    provider: "visible",
+    organizationName: "visible",
+    locationName: "visible",
+    encounterLabel: "visible",
     explanations: "visible",
   },
   nurse: {
     name: "visible",
     dob: "visible",
-    mrn: "visible",
+    patientIdentifier: "visible",
     conditions: "visible",
-    payer: "redacted",
-    appointmentLabel: "visible",
-    provider: "visible",
+    organizationName: "visible",
+    locationName: "visible",
+    encounterLabel: "visible",
     explanations: "visible",
   },
   provider: {
     name: "visible",
     dob: "visible",
-    mrn: "visible",
+    patientIdentifier: "visible",
     conditions: "visible",
-    payer: "visible",
-    appointmentLabel: "visible",
-    provider: "visible",
+    organizationName: "visible",
+    locationName: "visible",
+    encounterLabel: "visible",
     explanations: "visible",
   },
 };
@@ -50,11 +50,11 @@ const FIELD_VISIBILITY_MATRIX: Record<UserRole, Record<VisibleField, FieldVisibi
 const FIELD_ORDER: VisibleField[] = [
   "name",
   "dob",
-  "mrn",
+  "patientIdentifier",
   "conditions",
-  "payer",
-  "appointmentLabel",
-  "provider",
+  "organizationName",
+  "locationName",
+  "encounterLabel",
   "explanations",
 ];
 
@@ -86,7 +86,14 @@ export function applyFieldVisibility(results: SearchMatch[], role: string): Sear
       }
 
       if (visibility === "redacted") {
-        if (field === "dob" || field === "payer" || field === "name" || field === "mrn" || field === "appointmentLabel" || field === "provider") {
+        if (
+          field === "dob" ||
+          field === "name" ||
+          field === "patientIdentifier" ||
+          field === "organizationName" ||
+          field === "locationName" ||
+          field === "encounterLabel"
+        ) {
           visibleResult[field] = "***";
         }
         continue;

@@ -6,25 +6,19 @@ import type {
   SearchResponseEnvelope,
   TraceStep,
 } from "../../validation-schema";
+import { PUBLIC_DATA_DEFAULT_QUERY, PUBLIC_DATASET_LABEL } from "../shared/public-dataset-meta";
 
-const DEFAULT_QUERY = "Diabetic patients at Springfield clinic next Tuesday";
+const DEFAULT_QUERY = PUBLIC_DATA_DEFAULT_QUERY;
 const FILTER_ORDER: FilterType[] = [
   "condition",
   "location",
-  "appointment",
-  "payer",
-  "coverage",
-  "pa_status",
+  "encounter",
 ];
 
 const FILTER_LABELS: Record<FilterType, string> = {
   condition: "Condition",
   location: "Location",
-  appointment: "Appointment",
-  payer: "Payer",
-  coverage: "Coverage",
-  pa_status: "PA status",
-  panel: "Panel",
+  encounter: "Encounter",
 };
 
 type ApiError = {
@@ -89,7 +83,10 @@ function ResultCard({
         <div className="rc-copy">
           <div className="rc-name">{result.name}</div>
           <div className="rc-meta">
-            DOB {result.dob} | MRN {result.mrn}
+            Patient ID {result.patientIdentifier} | DOB {result.dob}
+          </div>
+          <div className="rc-meta rc-meta-secondary">
+            {result.locationName} | {result.organizationName}
           </div>
         </div>
         <div className="rc-badges">
@@ -159,11 +156,7 @@ export function App() {
   const [chipState, setChipState] = useState<Record<FilterType, boolean>>({
     condition: true,
     location: true,
-    appointment: true,
-    payer: false,
-    coverage: false,
-    pa_status: false,
-    panel: false,
+    encounter: false,
   });
 
   async function runSearch(nextQuery = query) {
@@ -196,11 +189,7 @@ export function App() {
         ...current,
         condition: searchResponse.chips.includes("condition"),
         location: searchResponse.chips.includes("location"),
-        appointment: searchResponse.chips.includes("appointment"),
-        payer: searchResponse.chips.includes("payer"),
-        coverage: searchResponse.chips.includes("coverage"),
-        pa_status: searchResponse.chips.includes("pa_status"),
-        panel: searchResponse.chips.includes("panel"),
+        encounter: searchResponse.chips.includes("encounter"),
       }));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unexpected error");
@@ -254,8 +243,8 @@ export function App() {
           <div className="logo">
             <LogoMark />
           </div>
-          <span className="topbar-title">Member search copilot</span>
-          <span className="topbar-sub">Prototype v1</span>
+          <span className="topbar-title">Encounter cohort copilot</span>
+          <span className="topbar-sub">{PUBLIC_DATASET_LABEL}</span>
           <div className="dot" />
         </header>
 
@@ -265,7 +254,7 @@ export function App() {
               className="search-input"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search your member cohort"
+              placeholder="Search de-identified encounter cohorts"
             />
             <button className="search-btn" type="submit" aria-label="Run search">
               <SearchIcon />
@@ -324,7 +313,7 @@ export function App() {
         </section>
 
         <section className="results">
-          {loading && <div className="notice-card">Running deterministic retrieval…</div>}
+          {loading && <div className="notice-card">Running de-identified FHIR retrieval…</div>}
           {error && <div className="notice-card notice-error">{error}</div>}
           {!loading && !error && response?.status === "clarify" && (
             <div className="notice-card">

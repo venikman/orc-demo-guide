@@ -10,11 +10,11 @@ const POLICY_VERSION = "2026-03-14.wave-1";
 const POLICY_FIELDS = [
   "name",
   "dob",
-  "mrn",
+  "patientIdentifier",
   "conditions",
-  "payer",
-  "appointmentLabel",
-  "provider",
+  "organizationName",
+  "locationName",
+  "encounterLabel",
   "explanations",
 ] as const;
 

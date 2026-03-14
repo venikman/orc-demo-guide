@@ -1,14 +1,17 @@
 import type {
   DemoSessionPreset,
-  SearchMatch,
   SearchPlan,
   SearchResponseEnvelope,
 } from "../../../validation-schema";
-import { getSyntheticMatches } from "../data/fixtures";
 import { writeAuditEvent } from "./audit";
 import { applyFieldVisibility } from "./field-visibility";
 import { logEvent } from "./logging";
 import { buildPolicyDecision } from "./policy";
+import {
+  buildSearchMatch,
+  getPublicDatasetRecords,
+  getPublicDatasetSourceCount,
+} from "./public-dataset";
 import {
   buildRequestEnvelope,
   buildTrace,
@@ -98,18 +101,19 @@ export function executeSearch(
     });
   }
 
-  const scopedMatches = enforcePresetScope(getSyntheticMatches(), preset);
+  const scopedRecords = enforcePresetScope(getPublicDatasetRecords(), preset);
   logEvent("retrieval.request", {
     request_id: request.request_id,
     role: preset.requester.role,
     filters: plan.filters,
-    scoped_candidates: scopedMatches.length,
+    scoped_candidates: scopedRecords.length,
   });
 
-  const filteredMatches = plan.filters.reduce<SearchMatch[]>(
-    (current, filter) => current.filter((match) => matchesFilter(match, filter)),
-    scopedMatches,
+  const filteredRecords = plan.filters.reduce(
+    (current, filter) => current.filter((record) => matchesFilter(record, filter)),
+    scopedRecords,
   );
+  const filteredMatches = filteredRecords.map((record) => buildSearchMatch(record, plan));
   const visibleMatches = applyFieldVisibility(filteredMatches, preset.requester.role);
 
   logEvent("retrieval.response", {
@@ -125,13 +129,13 @@ export function executeSearch(
     modelUsed,
     prompt,
     presetId: preset.id,
-    interpretedSummary: plan.summary ?? "Natural-language query compiled into deterministic cohort filters.",
-    stats: {
-      matched: visibleMatches.length,
-      sources: SOURCE_COUNT,
-      latencyMs,
-    },
-    chips: plan.filters.map((filter) => filter.type),
+      interpretedSummary: plan.summary ?? "Natural-language query compiled into deterministic cohort filters.",
+      stats: {
+        matched: visibleMatches.length,
+        sources: getPublicDatasetSourceCount(),
+        latencyMs,
+      },
+      chips: plan.filters.map((filter) => filter.type),
     trace: buildTrace(prompt, plan, visibleMatches.length),
     results: visibleMatches,
     totalResults: visibleMatches.length,
