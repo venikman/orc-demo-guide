@@ -3,14 +3,16 @@ import { z } from "zod";
 export const presetIdSchema = z.enum(["admin", "nurse", "provider"]);
 export type PresetId = z.infer<typeof presetIdSchema>;
 
+export const searchSourceModeSchema = z.enum(["langchain_google_agent"]);
+export type SearchSourceMode = z.infer<typeof searchSourceModeSchema>;
+
+export const searchTransportModeSchema = z.enum(["request_reply", "use_stream"]);
+export type SearchTransportMode = z.infer<typeof searchTransportModeSchema>;
+
 export const filterTypeSchema = z.enum([
   "condition",
   "location",
-  "appointment",
-  "payer",
-  "coverage",
-  "pa_status",
-  "panel",
+  "encounter",
 ]);
 export type FilterType = z.infer<typeof filterTypeSchema>;
 
@@ -28,7 +30,7 @@ export const fieldVisibilityStateSchema = z.enum(["visible", "redacted", "hidden
 export type FieldVisibilityState = z.infer<typeof fieldVisibilityStateSchema>;
 
 export const llmSearchPlanSchema = z.object({
-  intent: z.literal("find_members"),
+  intent: z.literal("find_encounters"),
   status: z.enum(["ready", "clarify", "deny"]),
   filters: z.array(searchFilterSchema).max(6).default([]),
   summary: z.string().max(240).optional(),
@@ -54,8 +56,8 @@ export type DemoSessionPreset = {
   purpose_of_use: "treatment" | "operations";
   smart_scopes: string[];
   field_visibility_profile_id: string;
-  allowedSiteIds: string[];
-  allowedProviders: string[];
+  allowedOrganizationNames: string[];
+  allowedLocationNames: string[];
 };
 
 export type SearchRequestEnvelope = {
@@ -94,23 +96,49 @@ export type TraceStep = {
   state: "done" | "active";
 };
 
+export const aiUsageSchema = z.object({
+  framework: z.literal("langchain"),
+  runtime: z.literal("createAgent"),
+  provider: z.literal("google_genai"),
+  sourceMode: searchSourceModeSchema,
+  transport: searchTransportModeSchema,
+  threadId: z.string().optional(),
+  model: z.string().nullable(),
+  inputTokens: z.number().nullable(),
+  outputTokens: z.number().nullable(),
+  totalTokens: z.number().nullable(),
+});
+export type AiUsage = z.infer<typeof aiUsageSchema>;
+
+export const dataFlowStageSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  detail: z.string().min(1),
+  countLabel: z.string().min(1).optional(),
+});
+export type DataFlowStage = z.infer<typeof dataFlowStageSchema>;
+
+export const searchMonitoringSchema = z.object({
+  aiUsage: aiUsageSchema,
+  dataFlow: z.array(dataFlowStageSchema).max(8),
+});
+export type SearchMonitoring = z.infer<typeof searchMonitoringSchema>;
+
 export type SearchMatch = {
   id: string;
   initials: string;
   name: string;
   dob: string;
-  mrn: string;
-  siteId: string;
-  siteName: string;
-  provider: string;
-  payer: string;
+  patientIdentifier: string;
+  organizationName: string;
+  locationId: string;
+  locationName: string;
   conditions?: Array<{
     label: string;
     code: string;
     aliases: string[];
   }>;
-  appointmentLabel: string;
-  appointmentIso: string;
+  encounterLabel: string;
   badges: Array<{
     label: string;
     tone: "green" | "amber" | "blue";
@@ -125,10 +153,11 @@ export type SearchMatch = {
 export type SearchResponseEnvelope = {
   requestId: string;
   status: "success" | "clarify" | "deny";
-  sourceMode: "gemini_api";
+  sourceMode: SearchSourceMode;
   modelUsed?: string;
   prompt: string;
   presetId: PresetId;
+  plan: SearchPlan;
   interpretedSummary: string;
   stats: {
     matched: number;
@@ -143,6 +172,13 @@ export type SearchResponseEnvelope = {
   clarificationQuestion?: string;
   denialReason?: string;
   policyDecision: PolicyDecision;
+  monitoring: SearchMonitoring;
+};
+
+export type SearchStreamState = {
+  prompt: string;
+  presetId: PresetId;
+  response: SearchResponseEnvelope | null;
 };
 
 export const searchRequestInputSchema = z.object({
@@ -186,7 +222,7 @@ export const auditEventSchema = z.object({
   outcome: z.enum(["success", "deny", "clarify", "error"]),
   detail: z.record(z.unknown()).optional(),
   purpose_of_use: z.enum(["treatment", "operations"]),
-  source_mode: z.enum(["gemini_api"]),
+  source_mode: searchSourceModeSchema,
   model_used: z.string().optional(),
 });
 export type AuditEvent = z.infer<typeof auditEventSchema>;

@@ -1,14 +1,153 @@
+import { Match, pipe } from "effect";
+
 import type {
   DemoSessionPreset,
   SearchFilter,
-  SearchMatch,
   SearchPlan,
   SearchRequestEnvelope,
   TraceStep,
 } from "../../../validation-schema";
+import type { PublicEncounterRecord } from "./public-dataset";
 
-export const SOURCE_COUNT = 3;
+export const SOURCE_COUNT = 5;
 export const PREVIEW_COUNT = 3;
+const FILLER_TOKENS = new Set(["a", "an", "at", "for", "in", "of", "on", "the", "to"]);
+const ENCOUNTER_NOISE_TOKENS = new Set(["encounter", "encounters"]);
+
+function normalizeText(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function tokenizeSearchPhrase(
+  value: string,
+  {
+    stripFillers = false,
+    ignoredTokens,
+  }: {
+    stripFillers?: boolean;
+    ignoredTokens?: Set<string>;
+  } = {},
+) {
+  return normalizeText(value)
+    .split(" ")
+    .filter(Boolean)
+    .filter((token) => {
+      if (stripFillers && FILLER_TOKENS.has(token)) {
+        return false;
+      }
+
+      return !ignoredTokens?.has(token);
+    });
+}
+
+function normalizeSearchPhrase(value: string, stripFillers = false) {
+  return tokenizeSearchPhrase(value, { stripFillers }).join(" ");
+}
+
+function hasTokenSequence(candidateTokens: string[], searchTokens: string[]) {
+  if (!searchTokens.length || searchTokens.length > candidateTokens.length) {
+    return false;
+  }
+
+  for (let startIndex = 0; startIndex <= candidateTokens.length - searchTokens.length; startIndex += 1) {
+    let matched = true;
+
+    for (let offset = 0; offset < searchTokens.length; offset += 1) {
+      if (candidateTokens[startIndex + offset] !== searchTokens[offset]) {
+        matched = false;
+        break;
+      }
+    }
+
+    if (matched) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function buildInitialism(tokens: string[]) {
+  return tokens.length > 1 ? tokens.map((token) => token[0]).join("") : null;
+}
+
+function matchesTokenSequence(
+  candidate: string | null | undefined,
+  searchValues: string[],
+  {
+    stripFillers = false,
+    ignoredTokens,
+    allowInitialism = false,
+    minimumSearchTokens = 1,
+  }: {
+    stripFillers?: boolean;
+    ignoredTokens?: Set<string>;
+    allowInitialism?: boolean;
+    minimumSearchTokens?: number;
+  } = {},
+) {
+  if (!candidate) {
+    return false;
+  }
+
+  const candidateTokens = tokenizeSearchPhrase(candidate, {
+    stripFillers,
+    ignoredTokens,
+  });
+  if (!candidateTokens.length) {
+    return false;
+  }
+
+  const candidateInitialism = allowInitialism ? buildInitialism(candidateTokens) : null;
+
+  return searchValues.some((searchValue) => {
+    const searchTokens = tokenizeSearchPhrase(searchValue, {
+      stripFillers,
+      ignoredTokens,
+    });
+    if (!searchTokens.length) {
+      return false;
+    }
+
+    const normalizedSearch = searchTokens.join(" ");
+    if (candidateInitialism && searchTokens.length === 1 && normalizedSearch === candidateInitialism) {
+      return true;
+    }
+
+    if (searchTokens.length < minimumSearchTokens) {
+      return false;
+    }
+
+    return hasTokenSequence(candidateTokens, searchTokens);
+  });
+}
+
+function matchesCandidate(
+  candidate: string | null | undefined,
+  searchValues: string[],
+  stripFillers = false,
+) {
+  if (!candidate) {
+    return false;
+  }
+
+  const normalizedCandidate = normalizeSearchPhrase(candidate, stripFillers);
+  if (!normalizedCandidate) {
+    return false;
+  }
+
+  return searchValues.some((searchValue) => {
+    const normalizedSearch = normalizeSearchPhrase(searchValue, stripFillers);
+    if (!normalizedSearch) {
+      return false;
+    }
+
+    return (
+      normalizedCandidate.includes(normalizedSearch) ||
+      normalizedSearch.includes(normalizedCandidate)
+    );
+  });
+}
 
 /**
  * Creates the typed request envelope used by deterministic retrieval.
@@ -48,122 +187,60 @@ export function buildRequestEnvelope(
 /**
  * Produces deterministic demo latency values for each plan status.
  */
-export function formatLatency(planStatus: SearchPlan["status"]) {
-  if (planStatus === "deny") {
-    return 96;
-  }
+export const formatLatency = (planStatus: SearchPlan["status"]) =>
+  pipe(
+    Match.value(planStatus),
+    Match.when("deny", () => 96),
+    Match.when("clarify", () => 118),
+    Match.when("ready", () => 340),
+    Match.exhaustive,
+  );
 
-  if (planStatus === "clarify") {
-    return 118;
-  }
-
-  return 340;
+function receiveStep(prompt: string, detail: string): TraceStep {
+  return {
+    id: "receive",
+    title: "Receive natural language",
+    agent: "Manager agent",
+    agentTone: "purple",
+    description: `User typed: "${prompt}"`,
+    detail,
+    timeLabel: "0 ms",
+    state: "done",
+  };
 }
 
-/**
- * Builds the trace artifact rendered in the client flow panel.
- */
-export function buildTrace(prompt: string, plan: SearchPlan, totalResults: number): TraceStep[] {
-  if (plan.status === "deny") {
-    return [
-      {
-        id: "receive",
-        title: "Receive natural language",
-        agent: "Manager agent",
-        agentTone: "purple",
-        description: `User typed: "${prompt}"`,
-        detail: "The request is evaluated before retrieval begins.",
-        timeLabel: "0 ms",
-        state: "done",
-      },
-      {
-        id: "policy",
-        title: "Apply safety gate",
-        agent: "Manager agent",
-        agentTone: "coral",
-        description: plan.denialReason ?? "Request refused by safety policy.",
-        detail: "Unsupported medical-advice and instruction-override requests are blocked before any cohort search executes.",
-        timeLabel: "96 ms",
-        state: "active",
-      },
-    ];
-  }
+function parseStep(plan: SearchPlan, descriptionPrefix: string): TraceStep {
+  return {
+    id: "parse",
+    title: "Parse intent into SearchRequest",
+    agent: "Manager agent",
+    agentTone: "purple",
+    description: `${descriptionPrefix} ${plan.filters.length} ${plan.filters.length === 1 ? "filter" : "filters"}${plan.filters.length > 0 ? `: ${plan.filters.map((filter) => filter.type).join(", ")}` : ""}`,
+    detail: JSON.stringify(
+      { intent: plan.intent, filters: plan.filters, output_mode: plan.outputMode },
+      null,
+      2,
+    ),
+    timeLabel: "45 ms",
+    state: "done",
+  };
+}
 
-  if (plan.status === "clarify") {
-    return [
-      {
-        id: "receive",
-        title: "Receive natural language",
-        agent: "Manager agent",
-        agentTone: "purple",
-        description: `User typed: "${prompt}"`,
-        detail: "The request is inspected as entered, without rewriting the prompt.",
-        timeLabel: "0 ms",
-        state: "done",
-      },
-      {
-        id: "parse",
-        title: "Parse intent into SearchRequest",
-        agent: "Manager agent",
-        agentTone: "purple",
-        description: `Detected ${plan.filters.length} candidate filter${plan.filters.length === 1 ? "" : "s"}`,
-        detail: JSON.stringify({ intent: plan.intent, filters: plan.filters }, null, 2),
-        timeLabel: "45 ms",
-        state: "done",
-      },
-      {
-        id: "clarify",
-        title: "Request clarification",
-        agent: "Scope resolver",
-        agentTone: "teal",
-        description: plan.clarificationQuestion ?? "The query needs one more detail before retrieval.",
-        detail: `Missing fields: ${plan.missingFields.join(", ")}`,
-        timeLabel: "118 ms",
-        state: "active",
-      },
-    ];
-  }
-
-  const appointmentFilter = plan.filters.find((filter) => filter.type === "appointment");
+function buildSuccessTrace(prompt: string, plan: SearchPlan, totalResults: number): TraceStep[] {
+  const encounterFilter = plan.filters.find((filter) => filter.type === "encounter");
   const locationFilter = plan.filters.find((filter) => filter.type === "location");
   const conditionFilter = plan.filters.find((filter) => filter.type === "condition");
 
   return [
-    {
-      id: "receive",
-      title: "Receive natural language",
-      agent: "Manager agent",
-      agentTone: "purple",
-      description: `User typed: "${prompt}"`,
-      detail: "Raw text passed to the manager agent. No preprocessing; the query remains intact.",
-      timeLabel: "0 ms",
-      state: "done",
-    },
-    {
-      id: "parse",
-      title: "Parse intent into SearchRequest",
-      agent: "Manager agent",
-      agentTone: "purple",
-      description: `Extracted ${plan.filters.length} filters: ${plan.filters.map((filter) => filter.type).join(", ")}`,
-      detail: JSON.stringify(
-        {
-          intent: plan.intent,
-          filters: plan.filters,
-          output_mode: plan.outputMode,
-        },
-        null,
-        2,
-      ),
-      timeLabel: "45 ms",
-      state: "done",
-    },
+    receiveStep(prompt, "Raw text passed to the manager agent. No preprocessing; the query remains intact."),
+    parseStep(plan, "Extracted"),
     {
       id: "terms",
       title: "Resolve clinical terms",
       agent: "Term resolver",
       agentTone: "teal",
-      description: `"${conditionFilter?.value ?? "condition"}" mapped to an approved concept set`,
-      detail: `"${conditionFilter?.value ?? "condition"}" -> concept_set from the approved diabetes map. Unsupported terms trigger clarification instead of approximation.`,
+      description: `"${conditionFilter?.value ?? "condition"}" mapped to public diagnosis codes`,
+      detail: `Condition text is matched against de-identified diagnosis labels and ICD codes from the public FHIR snapshot.`,
       timeLabel: "82 ms",
       state: "done",
     },
@@ -172,8 +249,8 @@ export function buildTrace(prompt: string, plan: SearchPlan, totalResults: numbe
       title: "Resolve scope",
       agent: "Scope resolver",
       agentTone: "teal",
-      description: `"${locationFilter?.value ?? "location"}" resolved within the preset's allowed clinic scope`,
-      detail: `Trusted preset scope is intersected with the requested location before retrieval. Appointment window: ${appointmentFilter?.value ?? "n/a"}.`,
+      description: `"${locationFilter?.value ?? "location"}" resolved within the preset's allowed encounter scope`,
+      detail: `Trusted role scope is intersected with the requested FHIR location before retrieval. Encounter detail: ${encounterFilter?.value ?? "not requested"}.`,
       timeLabel: "91 ms",
       state: "done",
     },
@@ -182,9 +259,19 @@ export function buildTrace(prompt: string, plan: SearchPlan, totalResults: numbe
       title: "Execute deterministic retrieval",
       agent: "Query engine",
       agentTone: "blue",
-      description: `Person index queried with all active filters intersected, returned ${totalResults} matches`,
+      description: `Encounter index queried with all active filters intersected, returned ${totalResults} matches`,
       detail: "The retrieval engine performs set intersection only. The LLM does not decide membership.",
       timeLabel: "240 ms",
+      state: "done",
+    },
+    {
+      id: "decision",
+      title: "Apply decision",
+      agent: "Policy engine",
+      agentTone: "purple",
+      description: "Decision set to allow after scope, match, and visibility checks completed",
+      detail: "The response is allowed only after the deterministic cohort, preset scope, and field-visibility rules agree on the final result set.",
+      timeLabel: "268 ms",
       state: "done",
     },
     {
@@ -192,8 +279,8 @@ export function buildTrace(prompt: string, plan: SearchPlan, totalResults: numbe
       title: "Validate evidence",
       agent: "Explanation builder",
       agentTone: "coral",
-      description: `${totalResults}/${totalResults} results retained after evidence and freshness checks`,
-      detail: "Each result is checked for visible evidence, appointment freshness, and source provenance labels.",
+      description: `${totalResults}/${totalResults} results retained after evidence and provenance checks`,
+      detail: "Each result is checked for visible de-identified evidence, encounter provenance, and source labels.",
       timeLabel: "305 ms",
       state: "done",
     },
@@ -207,7 +294,7 @@ export function buildTrace(prompt: string, plan: SearchPlan, totalResults: numbe
         {
           interpreted_intent: plan.intent,
           filters_applied: plan.filters.length,
-          sources_used: ["EHR", "Scheduling", "Payer"],
+          sources_used: ["Patient", "Condition", "Encounter", "Location", "Organization"],
           match_count: totalResults,
           confidence: "high",
         },
@@ -221,56 +308,102 @@ export function buildTrace(prompt: string, plan: SearchPlan, totalResults: numbe
 }
 
 /**
- * Applies a single search filter to a member card.
+ * Builds the trace artifact rendered in the client flow panel.
  */
-export function matchesFilter(match: SearchMatch, filter: SearchFilter) {
-  const lowerValue = filter.value.toLowerCase();
-  const locationAliases: Record<string, string[]> = {
-    "site-4021": ["springfield clinic", "springfield", "springfield family medicine"],
-    "site-1108": ["north campus", "north campus primary care", "north clinic"],
-  };
+export const buildTrace = (prompt: string, plan: SearchPlan, totalResults: number): TraceStep[] =>
+  pipe(
+    Match.value(plan.status),
+    Match.when("deny", () => [
+      receiveStep(prompt, "The request is evaluated before retrieval begins."),
+      {
+        id: "policy",
+        title: "Apply safety gate",
+        agent: "Manager agent",
+        agentTone: "coral" as const,
+        description: plan.denialReason ?? "Request refused by safety policy.",
+        detail: "Unsupported medical-advice and instruction-override requests are blocked before any cohort search executes.",
+        timeLabel: "96 ms",
+        state: "active" as const,
+      },
+    ]),
+    Match.when("clarify", () => [
+      receiveStep(prompt, "The request is inspected as entered, without rewriting the prompt."),
+      parseStep(plan, "Detected"),
+      {
+        id: "clarify",
+        title: "Request clarification",
+        agent: "Scope resolver",
+        agentTone: "teal" as const,
+        description: plan.clarificationQuestion ?? "The query needs one more detail before retrieval.",
+        detail: `Missing fields: ${plan.missingFields.join(", ")}`,
+        timeLabel: "118 ms",
+        state: "active" as const,
+      },
+    ]),
+    Match.when("ready", () => buildSuccessTrace(prompt, plan, totalResults)),
+    Match.exhaustive,
+  );
 
-  if (filter.type === "condition") {
-    return (match.conditions ?? []).some(
-      (condition) =>
-        condition.label.toLowerCase().includes(lowerValue) ||
-        condition.code.toLowerCase().includes(lowerValue) ||
-        condition.aliases.some((alias) => alias.toLowerCase().includes(lowerValue)),
-    );
-  }
+/**
+ * Applies a single search filter to a normalized public encounter record.
+ */
+export function matchesFilter(record: PublicEncounterRecord, filter: SearchFilter) {
+  const searchValues = [filter.canonicalValue, filter.value].filter(
+    (value): value is string => Boolean(value?.trim()),
+  );
 
-  if (filter.type === "location") {
-    return (
-      match.siteName.toLowerCase().includes(lowerValue) ||
-      match.siteId.toLowerCase().includes(lowerValue) ||
-      (locationAliases[match.siteId] ?? []).some(
-        (alias) => alias.includes(lowerValue) || lowerValue.includes(alias),
-      )
-    );
-  }
+  return pipe(
+    Match.value(filter.type),
+    Match.when("condition", () =>
+      record.conditions.some(
+        (condition) =>
+          matchesCandidate(condition.label, searchValues) ||
+          matchesCandidate(condition.code, searchValues) ||
+          condition.aliases.some((alias) => matchesCandidate(alias, searchValues)),
+      ),
+    ),
+    Match.when("location", () => {
+      const normalizedSearchValues = new Set(
+        searchValues
+          .map((value) => normalizeSearchPhrase(value, true))
+          .filter(Boolean),
+      );
+      const normalizedLocationId = normalizeSearchPhrase(record.locationId, true);
 
-  if (filter.type === "appointment") {
-    return match.appointmentLabel.toLowerCase().includes(lowerValue) || lowerValue === "next tuesday";
-  }
-
-  if (filter.type === "payer") {
-    return match.payer.toLowerCase().includes(lowerValue);
-  }
-
-  if (filter.type === "panel") {
-    return match.provider.toLowerCase().includes(lowerValue);
-  }
-
-  return true;
+      return (
+        matchesTokenSequence(record.locationName, searchValues, {
+          stripFillers: true,
+          allowInitialism: true,
+        }) ||
+        normalizedSearchValues.has(normalizedLocationId) ||
+        matchesTokenSequence(record.organizationName, searchValues, {
+          stripFillers: true,
+          allowInitialism: true,
+          minimumSearchTokens: 2,
+        })
+      );
+    }),
+    Match.when("encounter", () =>
+      matchesTokenSequence(record.encounterClass, searchValues, {
+        stripFillers: true,
+        ignoredTokens: ENCOUNTER_NOISE_TOKENS,
+      }) ||
+      matchesTokenSequence(record.encounterService, searchValues, {
+        stripFillers: true,
+        ignoredTokens: ENCOUNTER_NOISE_TOKENS,
+      }),
+    ),
+    Match.exhaustive,
+  );
 }
 
 /**
- * Restricts synthetic matches to the preset's allowed sites and providers.
+ * Restricts normalized encounter records to the preset's allowed organizations and locations.
  */
-export function enforcePresetScope(matches: SearchMatch[], preset: DemoSessionPreset) {
-  return matches.filter(
-    (match) =>
-      preset.allowedSiteIds.includes(match.siteId) &&
-      preset.allowedProviders.includes(match.provider),
+export function enforcePresetScope(records: PublicEncounterRecord[], preset: DemoSessionPreset) {
+  return records.filter(
+    (record) =>
+      preset.allowedOrganizationNames.includes(record.organizationName) &&
+      preset.allowedLocationNames.includes(record.locationName),
   );
 }

@@ -1,3 +1,5 @@
+import { Match, pipe } from "effect";
+
 import type {
   FieldVisibilityState,
   SearchMatch,
@@ -7,42 +9,42 @@ type UserRole = "admin" | "nurse" | "provider";
 type VisibleField =
   | "name"
   | "dob"
-  | "mrn"
+  | "patientIdentifier"
   | "conditions"
-  | "payer"
-  | "appointmentLabel"
-  | "provider"
+  | "organizationName"
+  | "locationName"
+  | "encounterLabel"
   | "explanations";
 
 const FIELD_VISIBILITY_MATRIX: Record<UserRole, Record<VisibleField, FieldVisibilityState>> = {
   admin: {
     name: "visible",
     dob: "redacted",
-    mrn: "visible",
+    patientIdentifier: "visible",
     conditions: "hidden",
-    payer: "visible",
-    appointmentLabel: "visible",
-    provider: "visible",
+    organizationName: "visible",
+    locationName: "visible",
+    encounterLabel: "visible",
     explanations: "visible",
   },
   nurse: {
     name: "visible",
     dob: "visible",
-    mrn: "visible",
+    patientIdentifier: "visible",
     conditions: "visible",
-    payer: "redacted",
-    appointmentLabel: "visible",
-    provider: "visible",
+    organizationName: "visible",
+    locationName: "visible",
+    encounterLabel: "visible",
     explanations: "visible",
   },
   provider: {
     name: "visible",
     dob: "visible",
-    mrn: "visible",
+    patientIdentifier: "visible",
     conditions: "visible",
-    payer: "visible",
-    appointmentLabel: "visible",
-    provider: "visible",
+    organizationName: "visible",
+    locationName: "visible",
+    encounterLabel: "visible",
     explanations: "visible",
   },
 };
@@ -50,11 +52,11 @@ const FIELD_VISIBILITY_MATRIX: Record<UserRole, Record<VisibleField, FieldVisibi
 const FIELD_ORDER: VisibleField[] = [
   "name",
   "dob",
-  "mrn",
+  "patientIdentifier",
   "conditions",
-  "payer",
-  "appointmentLabel",
-  "provider",
+  "organizationName",
+  "locationName",
+  "encounterLabel",
   "explanations",
 ];
 
@@ -70,33 +72,43 @@ export function getFieldVisibility(role: string, field: string): FieldVisibility
   return roleMatrix[field as VisibleField] ?? "hidden";
 }
 
+const REDACTABLE_FIELDS = new Set<VisibleField>([
+  "dob",
+  "name",
+  "patientIdentifier",
+  "organizationName",
+  "locationName",
+  "encounterLabel",
+]);
+
+function applyFieldToResult(result: SearchMatch, field: VisibleField, role: string): SearchMatch {
+  return pipe(
+    Match.value(getFieldVisibility(role, field)),
+    Match.when("visible", () => result),
+    Match.when("redacted", () =>
+      REDACTABLE_FIELDS.has(field)
+        ? { ...result, [field]: "***" }
+        : result,
+    ),
+    Match.when("hidden", () => {
+      if (field === "conditions") {
+        const { conditions: _, ...rest } = result;
+        return rest as SearchMatch;
+      }
+      return result;
+    }),
+    Match.exhaustive,
+  );
+}
+
 /**
  * Applies redaction and hiding rules to search results before they are returned.
  */
 export function applyFieldVisibility(results: SearchMatch[], role: string): SearchMatch[] {
-  return results.map((result) => {
-    const visibleResult: SearchMatch = {
-      ...result,
-    };
-
-    for (const field of FIELD_ORDER) {
-      const visibility = getFieldVisibility(role, field);
-      if (visibility === "visible") {
-        continue;
-      }
-
-      if (visibility === "redacted") {
-        if (field === "dob" || field === "payer" || field === "name" || field === "mrn" || field === "appointmentLabel" || field === "provider") {
-          visibleResult[field] = "***";
-        }
-        continue;
-      }
-
-      if (field === "conditions") {
-        delete visibleResult.conditions;
-      }
-    }
-
-    return visibleResult;
-  });
+  return results.map((result) =>
+    FIELD_ORDER.reduce<SearchMatch>(
+      (acc, field) => applyFieldToResult(acc, field, role),
+      { ...result },
+    ),
+  );
 }
