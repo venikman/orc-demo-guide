@@ -30,7 +30,7 @@ export const fieldVisibilityStateSchema = z.enum(["visible", "redacted", "hidden
 export type FieldVisibilityState = z.infer<typeof fieldVisibilityStateSchema>;
 
 export const llmSearchPlanSchema = z.object({
-  intent: z.literal("find_members"),
+  intent: z.literal("find_encounters"),
   status: z.enum(["ready", "clarify", "deny"]),
   filters: z.array(searchFilterSchema).max(6).default([]),
   summary: z.string().max(240).optional(),

@@ -17,7 +17,6 @@ import { buildPolicyDecision } from "./policy";
 import {
   buildSearchMatch,
   getPublicDatasetRecords,
-  getPublicDatasetSourceCount,
 } from "./public-dataset";
 import {
   buildRequestEnvelope,
@@ -270,7 +269,7 @@ export function executeSearch(
         ...base,
         status: "success" as const,
         interpretedSummary: plan.summary ?? "Natural-language query compiled into deterministic cohort filters.",
-        stats: { matched: visibleMatches.length, sources: getPublicDatasetSourceCount(), latencyMs },
+        stats: { matched: visibleMatches.length, sources: SOURCE_COUNT, latencyMs },
         chips: plan.filters.map((filter) => filter.type),
         trace: buildTrace(prompt, plan, visibleMatches.length),
         results: visibleMatches,

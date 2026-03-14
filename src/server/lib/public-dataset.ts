@@ -80,9 +80,6 @@ export function getPublicDatasetRecords(): PublicEncounterRecord[] {
   return [...MIMIC_DEMO_INDEX.records];
 }
 
-export function getPublicDatasetSourceCount() {
-  return 5;
-}
 
 export function buildSearchMatch(
   record: PublicEncounterRecord,
