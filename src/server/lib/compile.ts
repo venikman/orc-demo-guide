@@ -185,8 +185,11 @@ function sanitizeModelPayload(rawPayload: unknown) {
     return field;
   });
 
+  const intent = payload.intent === "find_members" ? "find_encounters" : payload.intent;
+
   return {
     ...payload,
+    intent,
     filters,
     missingFields,
   };
