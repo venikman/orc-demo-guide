@@ -9,6 +9,7 @@ import { getPreset, getPresetSummaries } from "./lib/presets";
 import { executeSearch } from "./lib/retrieve";
 
 const app = new Hono();
+type ErrorStatusCode = 400 | 500 | 502 | 503;
 
 app.get("/api/health", (c) =>
   c.json({
@@ -57,9 +58,9 @@ app.post("/api/search", async (c) => {
 
     return c.json<SearchResponseEnvelope>(response);
   } catch (error) {
-    const statusCode =
+    const statusCode: ErrorStatusCode =
       error instanceof GeminiModelRequirementError
-        ? error.statusCode
+        ? (error.statusCode as ErrorStatusCode)
         : error instanceof Error && error.name === "ZodError"
           ? 400
           : 500;

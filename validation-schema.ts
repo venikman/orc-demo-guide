@@ -21,6 +21,12 @@ export const searchFilterSchema = z.object({
 });
 export type SearchFilter = z.infer<typeof searchFilterSchema>;
 
+/**
+ * Runtime visibility states applied to response fields.
+ */
+export const fieldVisibilityStateSchema = z.enum(["visible", "redacted", "hidden"]);
+export type FieldVisibilityState = z.infer<typeof fieldVisibilityStateSchema>;
+
 export const llmSearchPlanSchema = z.object({
   intent: z.literal("find_members"),
   status: z.enum(["ready", "clarify", "deny"]),
@@ -98,7 +104,7 @@ export type SearchMatch = {
   siteName: string;
   provider: string;
   payer: string;
-  conditions: Array<{
+  conditions?: Array<{
     label: string;
     code: string;
     aliases: string[];
@@ -136,6 +142,7 @@ export type SearchResponseEnvelope = {
   previewCount: number;
   clarificationQuestion?: string;
   denialReason?: string;
+  policyDecision: PolicyDecision;
 };
 
 export const searchRequestInputSchema = z.object({
@@ -144,3 +151,42 @@ export const searchRequestInputSchema = z.object({
 });
 
 export type SearchRequestInput = z.infer<typeof searchRequestInputSchema>;
+
+/**
+ * Policy artifact returned alongside each search response.
+ */
+export const policyDecisionSchema = z.object({
+  decision_id: z.string().uuid(),
+  request_id: z.string().uuid(),
+  timestamp: z.string().datetime(),
+  action: z.enum(["allow", "deny", "escalate"]),
+  reason: z.string().max(500),
+  policy_version: z.string(),
+  role: z.enum(["admin", "nurse", "provider"]),
+  purpose_of_use: z.enum(["treatment", "operations"]),
+  effective_scopes: z.array(z.string()),
+  field_visibility: z.record(fieldVisibilityStateSchema),
+});
+export type PolicyDecision = z.infer<typeof policyDecisionSchema>;
+
+/**
+ * Typed audit event logged for provider-side search actions.
+ */
+export const auditEventSchema = z.object({
+  event_id: z.string().uuid(),
+  request_id: z.string().uuid(),
+  timestamp: z.string().datetime(),
+  actor: z.object({
+    user_id: z.string(),
+    role: z.enum(["admin", "nurse", "provider"]),
+    org_id: z.string(),
+  }),
+  action: z.enum(["search", "view_result", "export", "escalate"]),
+  resource_type: z.enum(["cohort", "member", "policy"]),
+  outcome: z.enum(["success", "deny", "clarify", "error"]),
+  detail: z.record(z.unknown()).optional(),
+  purpose_of_use: z.enum(["treatment", "operations"]),
+  source_mode: z.enum(["gemini_api"]),
+  model_used: z.string().optional(),
+});
+export type AuditEvent = z.infer<typeof auditEventSchema>;

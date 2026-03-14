@@ -12,11 +12,13 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "types": [
+      "bun-types",
       "vite/client"
     ]
   },
   "include": [
     "src",
+    "tests",
     "validation-schema.ts",
     "vite.config.ts"
   ]

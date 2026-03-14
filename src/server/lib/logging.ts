@@ -2,7 +2,7 @@ function truncateValue(value: string, max = 400) {
   return value.length > max ? `${value.slice(0, max)}...<truncated>` : value;
 }
 
-export function safeLogValue(value: unknown) {
+export function safeLogValue(value: unknown): unknown {
   if (typeof value === "string") {
     return truncateValue(value);
   }
