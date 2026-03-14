@@ -10,17 +10,114 @@ import type { PublicEncounterRecord } from "./public-dataset";
 export const SOURCE_COUNT = 5;
 export const PREVIEW_COUNT = 3;
 const FILLER_TOKENS = new Set(["a", "an", "at", "for", "in", "of", "on", "the", "to"]);
+const ENCOUNTER_NOISE_TOKENS = new Set(["encounter", "encounters"]);
 
 function normalizeText(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
-function normalizeSearchPhrase(value: string, stripFillers = false) {
-  const tokens = normalizeText(value)
+function tokenizeSearchPhrase(
+  value: string,
+  {
+    stripFillers = false,
+    ignoredTokens,
+  }: {
+    stripFillers?: boolean;
+    ignoredTokens?: Set<string>;
+  } = {},
+) {
+  return normalizeText(value)
     .split(" ")
-    .filter(Boolean);
+    .filter(Boolean)
+    .filter((token) => {
+      if (stripFillers && FILLER_TOKENS.has(token)) {
+        return false;
+      }
 
-  return (stripFillers ? tokens.filter((token) => !FILLER_TOKENS.has(token)) : tokens).join(" ");
+      return !ignoredTokens?.has(token);
+    });
+}
+
+function normalizeSearchPhrase(value: string, stripFillers = false) {
+  return tokenizeSearchPhrase(value, { stripFillers }).join(" ");
+}
+
+function hasTokenSequence(candidateTokens: string[], searchTokens: string[]) {
+  if (!searchTokens.length || searchTokens.length > candidateTokens.length) {
+    return false;
+  }
+
+  for (let startIndex = 0; startIndex <= candidateTokens.length - searchTokens.length; startIndex += 1) {
+    let matched = true;
+
+    for (let offset = 0; offset < searchTokens.length; offset += 1) {
+      if (candidateTokens[startIndex + offset] !== searchTokens[offset]) {
+        matched = false;
+        break;
+      }
+    }
+
+    if (matched) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function buildInitialism(tokens: string[]) {
+  return tokens.length > 1 ? tokens.map((token) => token[0]).join("") : null;
+}
+
+function matchesTokenSequence(
+  candidate: string | null | undefined,
+  searchValues: string[],
+  {
+    stripFillers = false,
+    ignoredTokens,
+    allowInitialism = false,
+    minimumSearchTokens = 1,
+  }: {
+    stripFillers?: boolean;
+    ignoredTokens?: Set<string>;
+    allowInitialism?: boolean;
+    minimumSearchTokens?: number;
+  } = {},
+) {
+  if (!candidate) {
+    return false;
+  }
+
+  const candidateTokens = tokenizeSearchPhrase(candidate, {
+    stripFillers,
+    ignoredTokens,
+  });
+  if (!candidateTokens.length) {
+    return false;
+  }
+
+  const candidateInitialism = allowInitialism ? buildInitialism(candidateTokens) : null;
+
+  return searchValues.some((searchValue) => {
+    const searchTokens = tokenizeSearchPhrase(searchValue, {
+      stripFillers,
+      ignoredTokens,
+    });
+    if (!searchTokens.length) {
+      return false;
+    }
+
+    const normalizedSearch = searchTokens.join(" ");
+    if (candidateInitialism && searchTokens.length === 1 && normalizedSearch === candidateInitialism) {
+      return true;
+    }
+
+    if (searchTokens.length < minimumSearchTokens) {
+      return false;
+    }
+
+    return hasTokenSequence(candidateTokens, searchTokens);
+  });
 }
 
 function matchesCandidate(
@@ -296,17 +393,29 @@ export function matchesFilter(record: PublicEncounterRecord, filter: SearchFilte
     const normalizedLocationId = normalizeSearchPhrase(record.locationId, true);
 
     return (
-      matchesCandidate(record.locationName, searchValues, true) ||
+      matchesTokenSequence(record.locationName, searchValues, {
+        stripFillers: true,
+        allowInitialism: true,
+      }) ||
       normalizedSearchValues.has(normalizedLocationId) ||
-      matchesCandidate(record.organizationName, searchValues, true)
+      matchesTokenSequence(record.organizationName, searchValues, {
+        stripFillers: true,
+        allowInitialism: true,
+        minimumSearchTokens: 2,
+      })
     );
   }
 
   if (filter.type === "encounter") {
     return (
-      matchesCandidate(record.encounterLabel, searchValues) ||
-      matchesCandidate(record.encounterClass, searchValues) ||
-      matchesCandidate(record.encounterService, searchValues)
+      matchesTokenSequence(record.encounterClass, searchValues, {
+        stripFillers: true,
+        ignoredTokens: ENCOUNTER_NOISE_TOKENS,
+      }) ||
+      matchesTokenSequence(record.encounterService, searchValues, {
+        stripFillers: true,
+        ignoredTokens: ENCOUNTER_NOISE_TOKENS,
+      })
     );
   }
 
