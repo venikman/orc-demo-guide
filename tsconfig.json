@@ -11,9 +11,15 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
     "types": [
       "bun-types",
-      "vite/client"
+      "vite/client",
+      "node"
     ]
   },
   "include": [

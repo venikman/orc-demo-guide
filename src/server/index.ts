@@ -3,13 +3,76 @@ import { serveStatic } from "hono/bun";
 
 import type { SearchResponseEnvelope } from "../../validation-schema";
 import { searchRequestInputSchema } from "../../validation-schema";
-import { compileSearchPlan, GeminiModelRequirementError } from "./lib/compile";
+import { GeminiModelRequirementError } from "./lib/compile";
 import { logEvent } from "./lib/logging";
-import { getPreset, getPresetSummaries } from "./lib/presets";
-import { executeSearch } from "./lib/retrieve";
+import { getPresetSummaries } from "./lib/presets";
+import { runSearchWorkflow } from "./lib/search-workflow";
 
 const app = new Hono();
+const encoder = new TextEncoder();
 type ErrorStatusCode = 400 | 500 | 502 | 503;
+
+function getErrorStatusCode(error: unknown): ErrorStatusCode {
+  if (error instanceof GeminiModelRequirementError) {
+    return error.statusCode as ErrorStatusCode;
+  }
+
+  if (error instanceof Error && error.name === "ZodError") {
+    return 400;
+  }
+
+  return 500;
+}
+
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Unexpected server error";
+}
+
+function getThreadId(payload: unknown) {
+  if (!payload || typeof payload !== "object") {
+    return undefined;
+  }
+
+  const config = (payload as Record<string, unknown>).config;
+  if (!config || typeof config !== "object") {
+    return undefined;
+  }
+
+  const configurable = (config as Record<string, unknown>).configurable;
+  if (!configurable || typeof configurable !== "object") {
+    return undefined;
+  }
+
+  const threadId = (configurable as Record<string, unknown>).thread_id;
+  return typeof threadId === "string" ? threadId : undefined;
+}
+
+function createSseResponse(
+  run: (send: (event: string, data: unknown) => void) => Promise<void>,
+) {
+  return new Response(
+    new ReadableStream({
+      async start(controller) {
+        const send = (event: string, data: unknown) => {
+          controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
+        };
+
+        try {
+          await run(send);
+        } finally {
+          controller.close();
+        }
+      },
+    }),
+    {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache, no-transform",
+        Connection: "keep-alive",
+      },
+    },
+  );
+}
 
 app.get("/api/health", (c) =>
   c.json({
@@ -25,57 +88,99 @@ app.get("/api/presets", (c) =>
 );
 
 app.post("/api/search", async (c) => {
-  let requestId: string | null = null;
+  const requestId = crypto.randomUUID();
 
   try {
-    requestId = crypto.randomUUID();
     const payload = searchRequestInputSchema.parse(await c.req.json());
-    const preset = getPreset(payload.presetId);
-    logEvent("api.search.request", {
-      request_id: requestId,
-      preset_id: payload.presetId,
-      prompt: payload.prompt,
-    });
-
-    const { plan, sourceMode, modelUsed } = await compileSearchPlan(payload.prompt, {
+    const response = await runSearchWorkflow({
       requestId,
+      prompt: payload.prompt,
       presetId: payload.presetId,
-    });
-    const response = executeSearch(payload.prompt, preset, plan, sourceMode, requestId, modelUsed);
-
-    logEvent("api.search.response", {
-      request_id: requestId,
-      status: response.status,
-      source_mode: response.sourceMode,
-      model_used: response.modelUsed,
-      matched: response.totalResults,
-      latency_ms: response.stats.latencyMs,
-      filters: plan.filters,
-      clarification_question: response.clarificationQuestion,
-      denial_reason: response.denialReason,
-      preview_names: response.results.slice(0, response.previewCount).map((result) => result.name),
+      transport: "request_reply",
     });
 
     return c.json<SearchResponseEnvelope>(response);
   } catch (error) {
-    const statusCode: ErrorStatusCode =
-      error instanceof GeminiModelRequirementError
-        ? (error.statusCode as ErrorStatusCode)
-        : error instanceof Error && error.name === "ZodError"
-          ? 400
-          : 500;
+    const statusCode = getErrorStatusCode(error);
 
     logEvent("api.search.error", {
       request_id: requestId,
       status_code: statusCode,
-      error: error instanceof Error ? error.message : "Unexpected server error",
+      error: getErrorMessage(error),
     });
     return c.json(
       {
-        error: error instanceof Error ? error.message : "Unexpected server error",
+        error: getErrorMessage(error),
       },
       statusCode,
     );
+  }
+});
+
+app.post("/api/search/stream", async (c) => {
+  const requestId = crypto.randomUUID();
+
+  try {
+    const payload = await c.req.json();
+    const input = searchRequestInputSchema.parse(
+      payload && typeof payload === "object" ? (payload as Record<string, unknown>).input : payload,
+    );
+    const threadId = getThreadId(payload);
+
+    return createSseResponse(async (send) => {
+      try {
+        send("values", {
+          prompt: input.prompt,
+          presetId: input.presetId,
+          response: null,
+        });
+
+        const response = await runSearchWorkflow({
+          requestId,
+          prompt: input.prompt,
+          presetId: input.presetId,
+          transport: "use_stream",
+          threadId,
+        });
+
+        send("values", {
+          prompt: input.prompt,
+          presetId: input.presetId,
+          response,
+        });
+      } catch (error) {
+        const statusCode = getErrorStatusCode(error);
+        logEvent("api.search.error", {
+          request_id: requestId,
+          status_code: statusCode,
+          error: getErrorMessage(error),
+          transport: "use_stream",
+          thread_id: threadId ?? null,
+        });
+
+        send("error", {
+          requestId,
+          statusCode,
+          message: getErrorMessage(error),
+        });
+      }
+    });
+  } catch (error) {
+    const statusCode = getErrorStatusCode(error);
+    logEvent("api.search.error", {
+      request_id: requestId,
+      status_code: statusCode,
+      error: getErrorMessage(error),
+      transport: "use_stream",
+    });
+
+    return createSseResponse(async (send) => {
+      send("error", {
+        requestId,
+        statusCode,
+        message: getErrorMessage(error),
+      });
+    });
   }
 });
 

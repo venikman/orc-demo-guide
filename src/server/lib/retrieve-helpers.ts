@@ -228,6 +228,16 @@ export function buildTrace(prompt: string, plan: SearchPlan, totalResults: numbe
       state: "done",
     },
     {
+      id: "decision",
+      title: "Apply decision",
+      agent: "Policy engine",
+      agentTone: "purple",
+      description: "Decision set to allow after scope, match, and visibility checks completed",
+      detail: "The response is allowed only after the deterministic cohort, preset scope, and field-visibility rules agree on the final result set.",
+      timeLabel: "268 ms",
+      state: "done",
+    },
+    {
       id: "validate",
       title: "Validate evidence",
       agent: "Explanation builder",
