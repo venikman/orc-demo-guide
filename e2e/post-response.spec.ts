@@ -2,6 +2,37 @@ import { test, expect } from "@playwright/test"
 import { expandWorkflowForScenario, mockCopilotApi } from "./support/copilot.ts"
 
 test.describe("Post-Response Panels", () => {
+  test("response badges and inline code use the shell styling system", async ({ page }) => {
+    await mockCopilotApi(page, {
+      response: () => ({
+        answer:
+          "Patient `Patient/patient-0001` is covered by the Northwind Health Plan (`Organization/org-payer-001`).",
+        agentUsed: "lookup",
+        citations: [{ resourceType: "Patient", id: "patient-0001" }],
+        confidence: "high",
+        reasoning: ["Classified the query for the lookup agent"],
+        toolsUsed: ["fhir_read_resource"],
+      }),
+    })
+    await page.goto("/")
+
+    await expandWorkflowForScenario(page, "member-insurance")
+    await page.getByTestId("scenario-member-insurance").click()
+
+    const response = page.getByTestId("response-content")
+    const badges = response.locator('[data-slot="badge"]')
+    const inlineCode = response.locator("code").first()
+
+    await expect(badges).toHaveCount(2)
+    await expect(inlineCode).toBeVisible()
+
+    const badgeRadius = await badges.first().evaluate((node) => getComputedStyle(node).borderRadius)
+    const codeFontFamily = await inlineCode.evaluate((node) => getComputedStyle(node).fontFamily)
+
+    expect(badgeRadius).toBe("0px")
+    expect(codeFontFamily.toLowerCase()).toContain("geist")
+  })
+
   test("reasoning panel is hidden by default and opens from the inspector toggle", async ({ page }) => {
     await mockCopilotApi(page)
     await page.goto("/")
@@ -84,6 +115,7 @@ test.describe("Post-Response Panels", () => {
     const box = await panel.boundingBox()
     expect(box).not.toBeNull()
     expect(box!.x).toBeGreaterThanOrEqual(0)
+    expect(box!.x).toBeGreaterThanOrEqual(840)
     expect(box!.x + box!.width).toBeLessThanOrEqual(1280)
 
     const hasOverflow = await panel.evaluate((node) => node.scrollWidth > node.clientWidth)

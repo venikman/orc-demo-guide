@@ -14,7 +14,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog.tsx"
 import { Textarea } from "@/components/ui/textarea.tsx"
-import { surfaceClasses } from "@/design-system/system.ts"
 import { JsonRenderView } from "@/render/json-render-view.tsx"
 import {
   buildCompletedSpec,
@@ -61,17 +60,14 @@ export default function App() {
 
   return (
     <div className="relative h-dvh overflow-hidden bg-background text-foreground">
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{ backgroundImage: "var(--app-backdrop)" }}
-      />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,oklch(0.845_0.143_164.978_/_0.24),transparent_34%),linear-gradient(180deg,oklch(0.988_0.003_106.5),oklch(1_0_0))]" />
 
       <div className="relative flex h-dvh flex-col lg:flex-row">
         <ScenarioSidebar onSend={handleSend} disabled={isPending} />
 
         <main className="order-1 flex min-h-0 flex-1 overflow-hidden">
           <section className="flex min-w-0 flex-1 flex-col">
-            <header className={`border-b border-border px-5 py-3 xl:px-7 ${surfaceClasses.header}`}>
+            <header className="border-b border-border bg-background/95 px-5 py-3 backdrop-blur-sm xl:px-7">
               <div className="mx-auto flex w-full max-w-[72rem] items-center gap-4">
                 <div className="min-w-0">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
@@ -111,7 +107,7 @@ export default function App() {
                       <div className="flex justify-end">
                         <div
                           data-testid="query-display"
-                          className={`max-w-[46rem] rounded-[var(--radius-panel)] border px-4 py-3 text-sm leading-6 ${surfaceClasses.queryBubble}`}
+                          className="max-w-[46rem] rounded-none border border-border bg-card px-4 py-3 text-sm leading-6 text-card-foreground"
                         >
                           {query}
                         </div>
@@ -134,7 +130,7 @@ export default function App() {
                       <div className={transcriptColumnClassName}>
                         <div
                           data-testid="error-message"
-                          className="rounded-[var(--radius-panel)] border border-destructive/20 bg-card p-4"
+                          className="rounded-none border border-destructive/20 bg-card p-4"
                         >
                           <JsonRenderView tree={buildErrorSpec(error)} />
                         </div>
@@ -173,12 +169,10 @@ export default function App() {
 
                 <div
                   data-testid="chat-composer"
-                  className={`sticky bottom-0 z-10 shrink-0 border-t border-border px-3 py-2 sm:px-5 xl:px-7 ${surfaceClasses.header}`}
+                  className="sticky bottom-0 z-10 shrink-0 border-t border-border bg-background/95 px-3 py-2 backdrop-blur-sm sm:px-5 xl:px-7"
                 >
                   <div className="mx-auto w-full max-w-[72rem]">
-                    <div
-                      className={`rounded-[var(--radius-shell)] border border-border px-4 py-3 ${surfaceClasses.elevatedPanel}`}
-                    >
+                    <div className="rounded-none border border-border bg-card px-4 py-3">
                       <div className="flex items-center gap-3">
                         <Textarea
                           data-testid="custom-input"
@@ -200,7 +194,7 @@ export default function App() {
                           disabled={isPending || !draft.trim()}
                           onClick={() => handleSend(draft)}
                           size="lg"
-                          className="min-w-20 px-3.5"
+                          className="min-w-20 rounded-lg px-3.5"
                         >
                           {isPending ? (
                             <LoaderCircle data-icon="inline-start" className="animate-spin" />
@@ -229,7 +223,7 @@ export default function App() {
             data-testid="inspector-panel"
             showCloseButton={false}
             side="right"
-            className={`overflow-hidden p-0 sm:border sm:border-border ${surfaceClasses.elevatedPanel}`}
+            className="overflow-hidden border-border bg-background p-0 sm:border"
           >
             <div className="flex h-full flex-col">
               <div className="flex items-start gap-3 border-b border-border px-5 py-4">
@@ -259,7 +253,7 @@ export default function App() {
 
               <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-4">
                 <div className="flex flex-col gap-4">
-                  <Card className="rounded-[var(--radius-panel)] bg-muted/40 shadow-none">
+                  <Card className="rounded-none bg-muted/40 shadow-none">
                     <CardContent className="flex flex-col gap-2 text-sm leading-6 text-muted-foreground">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
                         Session memory

@@ -150,7 +150,7 @@ test.describe("Visual Comparison Harness", () => {
       expect(appViewport.canScrollX).toBe(false)
       expect(appSummary.body?.fontFamily.toLowerCase()).toContain("geist")
       expect(referenceSummary.body?.fontFamily.toLowerCase()).toContain("geist")
-      expect(appSummary.elements[3]?.borderRadius).not.toBe("0px")
+      expect(appSummary.elements[3]?.borderRadius).toBe(referenceSummary.elements[1]?.borderRadius)
       expect(referenceSummary.elements[1]?.text).toContain("Get Started")
     } finally {
       await referenceContext.close()

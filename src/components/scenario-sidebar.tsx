@@ -1,13 +1,27 @@
 import { useState } from "react"
 import { workflows } from "@/client/scenarios.ts"
 import { Button } from "@/components/ui/button.tsx"
-import {
-  surfaceClasses,
-  workflowLaneDotClasses,
-  workflowRailClasses,
-} from "@/design-system/system.ts"
 import { cn } from "@/lib/utils.ts"
 import { ChevronRight, Minus, Plus } from "lucide-react"
+
+const workflowLaneDotClasses = {
+  "care-gaps": "bg-red-500",
+  quality: "bg-emerald-500",
+  utilization: "bg-violet-500",
+  membership: "bg-blue-500",
+  clinical: "bg-orange-500",
+  reconciliation: "bg-teal-500",
+} as const
+
+const workflowRailClasses = {
+  cardOpen: "border-primary/20 bg-accent/35",
+  actionChip:
+    "border border-border bg-background text-muted-foreground transition-colors group-hover:bg-muted",
+  partialBadge:
+    "border border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900/70 dark:bg-amber-950/40 dark:text-amber-300",
+  promptRow:
+    "border border-transparent bg-muted/45 text-foreground transition-colors hover:border-border hover:bg-accent",
+} as const
 
 interface ScenarioSidebarProps {
   onSend: (query: string) => void
@@ -20,7 +34,7 @@ export function ScenarioSidebar({ onSend, disabled }: ScenarioSidebarProps) {
   return (
     <aside
       data-testid="workflow-rail"
-      className={`relative z-10 order-2 flex max-h-[38dvh] w-full shrink-0 flex-col gap-3 overflow-hidden border-t border-border px-3 py-3 lg:order-none lg:h-dvh lg:max-h-none lg:w-[16.25rem] lg:border-t-0 lg:border-r ${surfaceClasses.rail}`}
+      className="relative z-10 order-2 flex max-h-[38dvh] w-full shrink-0 flex-col gap-3 overflow-hidden border-t border-border bg-sidebar/85 px-3 py-3 backdrop-blur-sm lg:order-none lg:h-dvh lg:max-h-none lg:w-[16.25rem] lg:border-t-0 lg:border-r"
     >
       <div className="flex flex-col gap-2 px-2">
         <div className="flex flex-col gap-1">
@@ -47,7 +61,7 @@ export function ScenarioSidebar({ onSend, disabled }: ScenarioSidebarProps) {
               key={w.id}
               data-testid={`workflow-card-${w.id}`}
               className={cn(
-                "overflow-hidden rounded-[var(--radius-panel)] border border-border/70 bg-card",
+                "overflow-hidden rounded-none border border-border/70 bg-card",
                 isExpanded && workflowRailClasses.cardOpen,
               )}
             >
@@ -67,7 +81,7 @@ export function ScenarioSidebar({ onSend, disabled }: ScenarioSidebarProps) {
                     </span>
                     {w.gaps.length > 0 && (
                       <span
-                        className={`inline-flex rounded-[var(--radius-control)] px-1.5 py-0 text-[9px] uppercase tracking-[0.18em] ${workflowRailClasses.partialBadge}`}
+                        className={`inline-flex rounded-none px-1.5 py-0 text-[9px] uppercase tracking-[0.18em] ${workflowRailClasses.partialBadge}`}
                       >
                         partial
                       </span>
@@ -75,7 +89,7 @@ export function ScenarioSidebar({ onSend, disabled }: ScenarioSidebarProps) {
                   </div>
                   <span
                     data-testid={`workflow-toggle-${w.id}`}
-                    className={`mt-0.5 inline-flex items-center gap-1 self-start justify-self-end rounded-[var(--radius-control)] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.18em] ${workflowRailClasses.actionChip}`}
+                    className={`mt-0.5 inline-flex items-center gap-1 self-start justify-self-end rounded-none px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.18em] ${workflowRailClasses.actionChip}`}
                   >
                     {isExpanded ? "Hide" : "Open"}
                     {isExpanded ? <Minus className="size-3" /> : <Plus className="size-3" />}
@@ -96,7 +110,7 @@ export function ScenarioSidebar({ onSend, disabled }: ScenarioSidebarProps) {
                         key={s.id}
                         variant="ghost"
                         size="sm"
-                        className={`h-auto w-full justify-start rounded-[var(--radius-control)] px-3 py-2 text-left text-[12px] font-medium leading-5 ${workflowRailClasses.promptRow}`}
+                        className={`h-auto w-full justify-start rounded-none px-3 py-2 text-left text-[12px] font-medium leading-5 ${workflowRailClasses.promptRow}`}
                         data-testid={`scenario-${s.id}`}
                         disabled={disabled}
                         onClick={() => onSend(s.query)}
