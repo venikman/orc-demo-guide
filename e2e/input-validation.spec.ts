@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test"
+import { mockCopilotApi } from "./support/copilot.ts"
 
 test.describe("Input Validation", () => {
   test("send button disabled when input empty", async ({ page }) => {
@@ -23,7 +24,26 @@ test.describe("Input Validation", () => {
     await expect(page.getByTestId("send-button")).toBeEnabled()
   })
 
+  test("primary action uses the adapted preset brand color", async ({ page }) => {
+    await page.goto("/")
+
+    await page.getByTestId("custom-input").fill("test query")
+
+    const { backgroundColor, primaryToken } = await page.getByTestId("send-button").evaluate((element) => {
+      return {
+        backgroundColor: window.getComputedStyle(element).backgroundColor,
+        primaryToken: window
+          .getComputedStyle(document.documentElement)
+          .getPropertyValue("--primary")
+          .trim(),
+      }
+    })
+
+    expect(backgroundColor).toBe(primaryToken)
+  })
+
   test("Enter key submits query", async ({ page }) => {
+    await mockCopilotApi(page)
     await page.goto("/")
 
     await page.getByTestId("custom-input").fill("How many patients?")
@@ -36,6 +56,7 @@ test.describe("Input Validation", () => {
   })
 
   test("input clears after submit", async ({ page }) => {
+    await mockCopilotApi(page)
     await page.goto("/")
 
     await page.getByTestId("custom-input").fill("How many patients?")
