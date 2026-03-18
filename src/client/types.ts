@@ -22,19 +22,17 @@ export interface AgentResponse {
   confidence: Confidence
 }
 
-// WebSocket messages: server → client
-export type WsServerMessage =
-  | { type: "meta"; agentType: AgentType; threadId: string }
-  | { type: "delta"; content: string }
-  | { type: "tool"; name: string; preview?: string }
-  | { type: "done"; response: AgentResponse }
-  | { type: "error"; message: string }
-
-// WebSocket messages: client → server
-export interface WsClientMessage {
-  type: "query"
+export interface CopilotRequest {
   query: string
   threadId?: string
 }
 
-export type CopilotState = "idle" | "connecting" | "streaming" | "done" | "error"
+export type CopilotState = "idle" | "pending" | "done" | "error"
+
+export interface CopilotTurn {
+  id: string
+  query: string
+  state: Exclude<CopilotState, "idle">
+  response: AgentResponse | null
+  error: string | null
+}

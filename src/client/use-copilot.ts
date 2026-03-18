@@ -1,152 +1,122 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type {
-  AgentResponse,
-  AgentType,
+  CopilotRequest,
+  CopilotTurn,
   CopilotState,
-  WsClientMessage,
-  WsServerMessage,
 } from "./types.ts"
 
-interface ToolCall {
-  name: string
-  preview?: string
-  timestamp: number
-}
-
 interface CopilotResult {
+  turns: CopilotTurn[]
+  latestTurn: CopilotTurn | null
   state: CopilotState
-  query: string | null
-  content: string
-  agentType: AgentType | null
-  toolCalls: ToolCall[]
-  response: AgentResponse | null
   error: string | null
+  isPending: boolean
   send: (query: string) => void
   reset: () => void
 }
 
-const WS_URL = import.meta.env.VITE_WS_URL ?? "ws://localhost:3000/api/copilot/ws"
+const API_ORIGIN = import.meta.env.VITE_API_URL ?? "http://localhost:3000"
+const COPILOT_URL = new URL("/api/copilot", API_ORIGIN).toString()
 
 export function useCopilot(): CopilotResult {
-  const [state, setState] = useState<CopilotState>("idle")
-  const [query, setQuery] = useState<string | null>(null)
-  const [content, setContent] = useState("")
-  const [agentType, setAgentType] = useState<AgentType | null>(null)
-  const [toolCalls, setToolCalls] = useState<ToolCall[]>([])
-  const [response, setResponse] = useState<AgentResponse | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  const wsRef = useRef<WebSocket | null>(null)
+  const [turns, setTurns] = useState<CopilotTurn[]>([])
   const threadIdRef = useRef<string>(crypto.randomUUID())
+  const abortRef = useRef<AbortController | null>(null)
 
-  // Clean up WebSocket on unmount
   useEffect(() => {
-    return () => {
-      wsRef.current?.close()
-      wsRef.current = null
-    }
+    return () => abortRef.current?.abort()
   }, [])
 
   const reset = useCallback(() => {
-    setState("idle")
-    setQuery(null)
-    setContent("")
-    setAgentType(null)
-    setToolCalls([])
-    setResponse(null)
-    setError(null)
+    abortRef.current?.abort()
+    abortRef.current = null
+    setTurns([])
     threadIdRef.current = crypto.randomUUID()
   }, [])
 
   const send = useCallback((query: string) => {
-    // Reset previous state
-    setQuery(query)
-    setContent("")
-    setAgentType(null)
-    setToolCalls([])
-    setResponse(null)
-    setError(null)
-    setState("connecting")
+    const trimmed = query.trim()
+    if (!trimmed) return
 
-    const openAndSend = (ws: WebSocket) => {
-      const msg: WsClientMessage = {
-        type: "query",
-        query,
+    abortRef.current?.abort()
+
+    const controller = new AbortController()
+    abortRef.current = controller
+
+    const turnId = crypto.randomUUID()
+    setTurns((prev) => [
+      ...prev,
+      {
+        id: turnId,
+        query: trimmed,
+        state: "pending",
+        response: null,
+        error: null,
+      },
+    ])
+
+    const run = async () => {
+      const payload: CopilotRequest = {
+        query: trimmed,
         threadId: threadIdRef.current,
       }
+
       try {
-        ws.send(JSON.stringify(msg))
-        setState("streaming")
-      } catch {
-        setError("Failed to send message")
-        setState("error")
+        const result = await fetch(COPILOT_URL, {
+          body: JSON.stringify(payload),
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+          signal: controller.signal,
+        })
+
+        if (!result.ok) {
+          throw new Error(`Request failed with status ${result.status}`)
+        }
+
+        const response = await result.json()
+
+        setTurns((prev) =>
+          prev.map((turn) =>
+            turn.id === turnId
+              ? {
+                  ...turn,
+                  state: "done",
+                  response,
+                  error: null,
+                }
+              : turn,
+          ),
+        )
+      } catch (error) {
+        if (controller.signal.aborted) return
+
+        setTurns((prev) =>
+          prev.map((turn) =>
+            turn.id === turnId
+              ? {
+                  ...turn,
+                  state: "error",
+                  response: null,
+                  error:
+                    error instanceof Error ? error.message : "The request could not be completed.",
+                }
+              : turn,
+          ),
+        )
+      } finally {
+        if (abortRef.current === controller) {
+          abortRef.current = null
+        }
       }
     }
 
-    // Reuse existing open connection
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      openAndSend(wsRef.current)
-      return
-    }
-
-    // Close stale connection — clear handlers first to prevent the old
-    // onclose from nulling wsRef after we assign the new socket below
-    if (wsRef.current) {
-      const old = wsRef.current
-      old.onopen = null
-      old.onmessage = null
-      old.onerror = null
-      old.onclose = null
-      old.close()
-    }
-
-    const ws = new WebSocket(WS_URL)
-    wsRef.current = ws
-
-    ws.onopen = () => openAndSend(ws)
-
-    ws.onmessage = ({ data }) => {
-      const msg = JSON.parse(data as string) as WsServerMessage
-      switch (msg.type) {
-        case "meta":
-          setAgentType(msg.agentType)
-          break
-        case "delta":
-          setContent((prev) => prev + msg.content)
-          break
-        case "tool":
-          setToolCalls((prev) => [
-            ...prev,
-            { name: msg.name, preview: msg.preview, timestamp: Date.now() },
-          ])
-          break
-        case "done":
-          setResponse(msg.response)
-          setState("done")
-          break
-        case "error":
-          setError(msg.message)
-          setState("error")
-          break
-      }
-    }
-
-    ws.onerror = () => {
-      setError("WebSocket connection failed")
-      setState("error")
-    }
-
-    ws.onclose = (e) => {
-      if (e.code !== 1000 && e.code !== 1005) {
-        setError(`Connection closed: ${e.reason || "unexpected"}`)
-        setState("error")
-      }
-      // Only null the ref if this is still the active socket
-      if (wsRef.current === ws) {
-        wsRef.current = null
-      }
-    }
+    void run()
   }, [])
 
-  return { state, query, content, agentType, toolCalls, response, error, send, reset }
+  const latestTurn = useMemo(() => turns.at(-1) ?? null, [turns])
+  const state = latestTurn?.state ?? "idle"
+  const isPending = state === "pending"
+  const error = latestTurn?.error ?? null
+
+  return { turns, latestTurn, state, error, isPending, send, reset }
 }
