@@ -1,160 +1,279 @@
-import { Streamdown } from "streamdown"
+import { useMemo, useState } from "react"
 import "streamdown/styles.css"
 import { useCopilot } from "./use-copilot.ts"
-import { workflows } from "./scenarios.ts"
+import { findWorkflowByQuery, workflows } from "./scenarios.ts"
 import { ScenarioSidebar } from "@/components/scenario-sidebar.tsx"
 import { AgentBadge } from "@/components/agent-badge.tsx"
 import { ConfidenceBadge } from "@/components/confidence-badge.tsx"
-import { ToolCallIndicator } from "@/components/tool-call-indicator.tsx"
-import { CitationsList } from "@/components/citations-list.tsx"
-import { ReasoningPanel } from "@/components/reasoning-panel.tsx"
-import { Separator } from "@/components/ui/separator.tsx"
 import { Button } from "@/components/ui/button.tsx"
+import { Card, CardContent } from "@/components/ui/card.tsx"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog.tsx"
+import { Textarea } from "@/components/ui/textarea.tsx"
+import { surfaceClasses } from "@/design-system/system.ts"
+import { JsonRenderView } from "@/render/json-render-view.tsx"
+import {
+  buildCompletedSpec,
+  buildErrorSpec,
+  buildIdleSpec,
+  buildInspectorSpec,
+  buildPendingSpec,
+  buildWorkflowBriefSpec,
+} from "@/render/spec-builders.ts"
+import { LoaderCircle, PanelRightClose, PanelRightOpen, SendHorizontal, X } from "lucide-react"
 
 export default function App() {
-  const { state, query, content, agentType, toolCalls, response, error, send, reset } =
-    useCopilot()
+  const { latestTurn, state, error, isPending, send, reset } = useCopilot()
+  const [draft, setDraft] = useState("")
+  const [inspectorOpen, setInspectorOpen] = useState(false)
+  const response = latestTurn?.response ?? null
+  const query = latestTurn?.query ?? null
 
-  const isActive = state === "connecting" || state === "streaming"
+  const completedSpec = response ? buildCompletedSpec(response) : null
+  const idleSpec = buildIdleSpec(workflows)
+  const pendingSpec = query ? buildPendingSpec(query) : null
+  const inspectorSpec = response ? buildInspectorSpec(response) : null
+  const activeWorkflow = useMemo(() => (query ? findWorkflowByQuery(query) : null), [query])
+  const workflowBriefSpec = useMemo(
+    () => (activeWorkflow ? buildWorkflowBriefSpec(activeWorkflow) : null),
+    [activeWorkflow],
+  )
+  const showInspector = Boolean(response && inspectorSpec)
+  const transcriptColumnClassName = "w-full max-w-[54rem]"
+
+  const handleSend = (nextQuery: string) => {
+    const trimmed = nextQuery.trim()
+    if (!trimmed) return
+
+    setInspectorOpen(false)
+    setDraft("")
+    send(trimmed)
+  }
+
+  const handleReset = () => {
+    setInspectorOpen(false)
+    reset()
+  }
 
   return (
-    <div className="flex h-screen bg-background">
-      <ScenarioSidebar onSend={send} disabled={isActive} />
+    <div className="relative h-dvh overflow-hidden bg-background text-foreground">
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{ backgroundImage: "var(--app-backdrop)" }}
+      />
 
-      <main className="flex-1 flex flex-col overflow-hidden p-6">
-        {state === "idle" && (
-          <div className="flex-1 flex items-center justify-center" data-testid="idle-message">
-            <div className="max-w-2xl space-y-6">
-              <div className="text-center space-y-2">
-                <h1 className="text-2xl font-semibold text-foreground">
-                  Provider Copilot
-                </h1>
-                <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                  Ask questions about attributed patients, care gaps, quality metrics, and
-                  more. Pick a workflow from the sidebar or type your own query.
-                </p>
-              </div>
+      <div className="relative flex h-dvh flex-col lg:flex-row">
+        <ScenarioSidebar onSend={handleSend} disabled={isPending} />
 
-              <div className="grid grid-cols-2 gap-3 text-left">
-                {workflows.map((w) => (
-                  <div
-                    key={w.id}
-                    className="rounded-lg border border-border p-3 space-y-1.5"
+        <main className="order-1 flex min-h-0 flex-1 overflow-hidden">
+          <section className="flex min-w-0 flex-1 flex-col">
+            <header className={`border-b border-border px-5 py-3 xl:px-7 ${surfaceClasses.header}`}>
+              <div className="mx-auto flex w-full max-w-[72rem] items-center gap-4">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+                    Provider Copilot v2
+                  </p>
+                  <p className="mt-0.5 text-sm leading-5 text-muted-foreground">Chat-first. Details stay on demand.</p>
+                </div>
+
+                {state !== "idle" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="ml-auto px-4"
+                    onClick={handleReset}
+                    data-testid="reset-button"
                   >
-                    <div className="flex items-center gap-2">
-                      <span className={`size-2 rounded-full ${w.color} shrink-0`} />
-                      <span className="text-sm font-medium">{w.label}</span>
-                      {w.gaps.length > 0 && (
-                        <span className="text-[10px] text-yellow-600 bg-yellow-500/10 rounded px-1 ml-auto">
-                          partial
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {w.description}
-                    </p>
-                    {w.gaps.length > 0 && (
-                      <div className="pt-1 border-t border-border space-y-0.5">
-                        {w.gaps.map((g, i) => (
-                          <p key={i} className="text-[11px] text-yellow-600/80 leading-tight">
-                            {g}
-                          </p>
-                        ))}
+                    Clear
+                  </Button>
+                )}
+              </div>
+            </header>
+
+            <div className="flex min-h-0 flex-1">
+              <div className="flex min-w-0 flex-1 flex-col">
+                <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 xl:px-7">
+                  <div
+                    data-testid="chat-stage"
+                    className="mx-auto flex w-full max-w-[72rem] flex-col gap-4"
+                  >
+                    {state === "idle" && (
+                      <div data-testid="idle-message" className="max-w-2xl pt-6">
+                        <JsonRenderView tree={idleSpec} />
                       </div>
                     )}
+
+                    {query && (
+                      <div className="flex justify-end">
+                        <div
+                          data-testid="query-display"
+                          className={`max-w-[46rem] rounded-[var(--radius-panel)] border px-4 py-3 text-sm leading-6 ${surfaceClasses.queryBubble}`}
+                        >
+                          {query}
+                        </div>
+                      </div>
+                    )}
+
+                    {workflowBriefSpec && (
+                      <div className={transcriptColumnClassName}>
+                        <JsonRenderView tree={workflowBriefSpec} />
+                      </div>
+                    )}
+
+                    {isPending && pendingSpec && (
+                      <div className={transcriptColumnClassName}>
+                        <JsonRenderView tree={pendingSpec} />
+                      </div>
+                    )}
+
+                    {error && (
+                      <div className={transcriptColumnClassName}>
+                        <div
+                          data-testid="error-message"
+                          className="rounded-[var(--radius-panel)] border border-destructive/20 bg-card p-4"
+                        >
+                          <JsonRenderView tree={buildErrorSpec(error)} />
+                        </div>
+                      </div>
+                    )}
+
+                    {response && completedSpec && (
+                      <>
+                        <div className={`flex flex-wrap items-center gap-2.5 ${transcriptColumnClassName}`}>
+                          <AgentBadge agent={response.agentUsed} />
+                          <ConfidenceBadge confidence={response.confidence} />
+                          <Button
+                            type="button"
+                            variant={inspectorOpen ? "secondary" : "outline"}
+                            size="sm"
+                            onClick={() => setInspectorOpen((open) => !open)}
+                            data-testid="inspector-toggle"
+                            className="ml-auto px-3"
+                          >
+                            {inspectorOpen ? (
+                              <PanelRightClose data-icon="inline-start" />
+                            ) : (
+                              <PanelRightOpen data-icon="inline-start" />
+                            )}
+                            {inspectorOpen ? "Hide details" : "Show details"}
+                          </Button>
+                        </div>
+
+                        <div className={transcriptColumnClassName}>
+                          <JsonRenderView tree={completedSpec} />
+                        </div>
+                      </>
+                    )}
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
+                </div>
 
-        {state !== "idle" && (
-          <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
-            {/* User query bubble */}
-            {query && (
-              <div className="flex justify-end">
                 <div
-                  data-testid="query-display"
-                  className="rounded-2xl rounded-br-sm bg-primary px-4 py-2 text-sm text-primary-foreground max-w-[75%]"
+                  data-testid="chat-composer"
+                  className={`sticky bottom-0 z-10 shrink-0 border-t border-border px-3 py-2 sm:px-5 xl:px-7 ${surfaceClasses.header}`}
                 >
-                  {query}
+                  <div className="mx-auto w-full max-w-[72rem]">
+                    <div
+                      className={`rounded-[var(--radius-shell)] border border-border px-4 py-3 ${surfaceClasses.elevatedPanel}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Textarea
+                          data-testid="custom-input"
+                          rows={1}
+                          placeholder="Ask the FHIR data..."
+                          value={draft}
+                          onChange={(e) => setDraft(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) {
+                              e.preventDefault()
+                              handleSend(draft)
+                            }
+                          }}
+                          disabled={isPending}
+                          className="h-11 min-h-11 max-h-24 resize-none rounded-none border-0 bg-transparent px-0 py-1.5 text-sm leading-6 shadow-none focus-visible:border-transparent focus-visible:ring-0"
+                        />
+                        <Button
+                          data-testid="send-button"
+                          disabled={isPending || !draft.trim()}
+                          onClick={() => handleSend(draft)}
+                          size="lg"
+                          className="min-w-20 px-3.5"
+                        >
+                          {isPending ? (
+                            <LoaderCircle data-icon="inline-start" className="animate-spin" />
+                          ) : (
+                            <SendHorizontal data-icon="inline-start" />
+                          )}
+                          {isPending ? "Working" : "Send"}
+                        </Button>
+                      </div>
+                      <div className="flex items-center justify-between gap-3 pt-1.5 text-[10px] leading-4 text-muted-foreground">
+                        <p>Thread stays active until you clear it.</p>
+                        <p>{isPending ? "Waiting for the final answer." : "Shift+Enter for a line break."}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            )}
-
-            {/* Header: agent type + confidence */}
-            <div className="flex items-center gap-2">
-              {agentType && <AgentBadge agent={agentType} />}
-              {response?.confidence && (
-                <ConfidenceBadge confidence={response.confidence} />
-              )}
-              {isActive && (
-                <span
-                  data-testid="streaming-indicator"
-                  className="ml-auto text-xs text-muted-foreground animate-pulse"
-                >
-                  Streaming...
-                </span>
-              )}
-              {(state === "done" || state === "error") && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="ml-auto"
-                  onClick={reset}
-                  data-testid="reset-button"
-                >
-                  Clear
-                </Button>
-              )}
             </div>
+          </section>
+        </main>
+      </div>
 
-            <Separator />
-
-            {/* Streaming content */}
-            {content && (
-              <div data-testid="response-content" className="prose prose-sm max-w-none">
-                <Streamdown>{content}</Streamdown>
-              </div>
-            )}
-
-            {/* Tool calls */}
-            {toolCalls.length > 0 && (
-              <div data-testid="tool-calls" className="flex flex-wrap gap-1.5">
-                {toolCalls.map((tc, i) => (
-                  <ToolCallIndicator
-                    key={`${tc.name}-${i}`}
-                    name={tc.name}
-                    preview={tc.preview}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Error */}
-            {error && (
-              <div
-                data-testid="error-message"
-                className="rounded-md bg-destructive/10 p-3 text-sm text-destructive"
-              >
-                {error}
-              </div>
-            )}
-
-            {/* Post-done details */}
-            {response && (
-              <>
-                <Separator />
-                <div className="grid gap-4 md:grid-cols-2">
-                  <ReasoningPanel steps={response.reasoning} />
-                  <CitationsList citations={response.citations} />
+      {showInspector && (
+        <Dialog open={inspectorOpen} onOpenChange={setInspectorOpen}>
+          <DialogContent
+            data-testid="inspector-panel"
+            showCloseButton={false}
+            side="right"
+            className={`overflow-hidden p-0 sm:border sm:border-border ${surfaceClasses.elevatedPanel}`}
+          >
+            <div className="flex h-full flex-col">
+              <div className="flex items-start gap-3 border-b border-border px-5 py-4">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                    Explainability
+                  </p>
+                  <DialogTitle className="mt-1 text-base font-semibold tracking-[-0.02em] text-foreground">
+                    Trace details
+                  </DialogTitle>
+                  <DialogDescription className="mt-1 text-xs leading-5 text-muted-foreground">
+                    Reasoning, tools, and citations stay here so the transcript can stay clean.
+                  </DialogDescription>
                 </div>
-              </>
-            )}
-          </div>
-        )}
-      </main>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  className="border border-border bg-background"
+                  onClick={() => setInspectorOpen(false)}
+                  data-testid="inspector-close"
+                >
+                  <X />
+                  <span className="sr-only">Close details</span>
+                </Button>
+              </div>
+
+              <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-4">
+                <div className="flex flex-col gap-4">
+                  <Card className="rounded-[var(--radius-panel)] bg-muted/40 shadow-none">
+                    <CardContent className="flex flex-col gap-2 text-sm leading-6 text-muted-foreground">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                        Session memory
+                      </p>
+                      <p>Follow-up questions keep the same thread until you clear the session.</p>
+                    </CardContent>
+                  </Card>
+                  <JsonRenderView tree={inspectorSpec} />
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }

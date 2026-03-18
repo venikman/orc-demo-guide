@@ -10,7 +10,6 @@ export interface Workflow {
   id: string
   label: string
   description: string
-  color: string
   scenarios: Scenario[]
   examples: string[]
   gaps: string[]
@@ -22,7 +21,6 @@ export const workflows: Workflow[] = [
     label: "Care Gaps",
     description:
       "Close care gaps for attributed members — find patients missing screenings, treatments, or follow-ups that count toward quality and reconciliation.",
-    color: "bg-red-500",
     scenarios: [
       {
         id: "gaps-metformin",
@@ -56,7 +54,6 @@ export const workflows: Workflow[] = [
     label: "Quality & Performance",
     description:
       "Meet quality metrics and track performance against targets — aggregate clinical data to measure compliance and identify outliers.",
-    color: "bg-green-500",
     scenarios: [
       {
         id: "quality-diabetes-encounters",
@@ -87,7 +84,6 @@ export const workflows: Workflow[] = [
     label: "Utilization & Costs",
     description:
       "Track care costs and utilization for attributed patients — monitor encounter volumes and specialist activity as a proxy for spend.",
-    color: "bg-purple-500",
     scenarios: [
       {
         id: "util-encounters",
@@ -114,7 +110,6 @@ export const workflows: Workflow[] = [
     label: "Membership & Attribution",
     description:
       "Track monthly membership, confirm attribution, and review panel composition — verify who is on the list and their coverage status.",
-    color: "bg-blue-500",
     scenarios: [
       {
         id: "member-lists",
@@ -142,7 +137,6 @@ export const workflows: Workflow[] = [
     label: "Patient History & Continuity",
     description:
       "Maintain clinical context as members transition — pull conditions, meds, labs, and encounters into narrative summaries for care continuity.",
-    color: "bg-orange-500",
     scenarios: [
       {
         id: "clinical-summary",
@@ -166,7 +160,6 @@ export const workflows: Workflow[] = [
     label: "Reconciliation & Export",
     description:
       "Export data for end-of-year reconciliation — bulk export FHIR resources to verify attribution and document care delivered.",
-    color: "bg-teal-500",
     scenarios: [
       {
         id: "recon-export",
@@ -186,3 +179,15 @@ export const workflows: Workflow[] = [
 
 /** Flat list of all scenarios across workflows — useful for tests and lookups */
 export const allScenarios = workflows.flatMap((w) => w.scenarios)
+
+export function findWorkflowByQuery(query: string): Workflow | null {
+  const trimmed = query.trim()
+  if (!trimmed) return null
+
+  return (
+    workflows.find((workflow) =>
+      workflow.scenarios.some((scenario) => scenario.query === trimmed) ||
+      workflow.examples.some((example) => example === trimmed),
+    ) ?? null
+  )
+}
