@@ -4,21 +4,21 @@ import { Button } from "@/components/ui/button.tsx"
 import { cn } from "@/lib/utils.ts"
 import { ChevronRight, Minus, Plus } from "lucide-react"
 
-const workflowLaneDotClasses = {
-  "care-gaps": "bg-red-500",
-  quality: "bg-emerald-500",
-  utilization: "bg-violet-500",
-  membership: "bg-blue-500",
-  clinical: "bg-orange-500",
-  reconciliation: "bg-teal-500",
+export const workflowLaneDotClasses = {
+  "care-gaps": "bg-[var(--workflow-care-gaps)]",
+  quality: "bg-[var(--workflow-quality)]",
+  utilization: "bg-[var(--workflow-utilization)]",
+  membership: "bg-[var(--workflow-membership)]",
+  clinical: "bg-[var(--workflow-clinical)]",
+  reconciliation: "bg-[var(--workflow-reconciliation)]",
 } as const
 
-const workflowRailClasses = {
+export const workflowRailClasses = {
   cardOpen: "border-primary/20 bg-accent/35",
   actionChip:
     "border border-border bg-background text-muted-foreground transition-colors group-hover:bg-muted",
   partialBadge:
-    "border border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900/70 dark:bg-amber-950/40 dark:text-amber-300",
+    "border border-[var(--workflow-partial-border)] bg-[var(--workflow-partial-bg)] text-[var(--workflow-partial-fg)]",
   promptRow:
     "border border-transparent bg-muted/45 text-foreground transition-colors hover:border-border hover:bg-accent",
 } as const
@@ -55,7 +55,7 @@ export function ScenarioSidebar({ onSend, disabled }: ScenarioSidebarProps) {
           const isExpanded = expandedId === w.id
           const laneDotClass =
             workflowLaneDotClasses[w.id as keyof typeof workflowLaneDotClasses] ??
-            "bg-[color:var(--brand-600)]"
+            "bg-[var(--primary)]"
           return (
             <div
               key={w.id}

@@ -24,6 +24,15 @@
     --ring: oklch(0.737 0.021 106.9);
     --radius: 0.625rem;
     --sidebar: oklch(0.988 0.003 106.5);
+    --workflow-partial-bg: oklch(0.959 0.023 84.8);
+    --workflow-partial-border: oklch(0.834 0.047 80.2);
+    --workflow-partial-fg: oklch(0.486 0.072 72.1);
+    --workflow-care-gaps: oklch(0.628 0.164 24.8);
+    --workflow-quality: oklch(0.661 0.129 162.7);
+    --workflow-utilization: oklch(0.62 0.123 293.1);
+    --workflow-membership: oklch(0.624 0.127 251.4);
+    --workflow-clinical: oklch(0.723 0.149 55.8);
+    --workflow-reconciliation: oklch(0.655 0.111 201.3);
 }
 
 @theme inline {
