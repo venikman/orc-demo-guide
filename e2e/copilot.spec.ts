@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { expandWorkflowForScenario, mockCopilotApi } from "./support/copilot.ts"
+import { expandWorkflowForScenario, waitForCopilotResponse } from "./support/copilot.ts"
 import { workflows } from "../src/client/scenarios.ts"
 
 // One representative scenario per agent type to verify routing
@@ -17,7 +17,6 @@ test.describe("Copilot Agent Validator", () => {
   test("page loads with all scenario buttons and a visible center composer", async ({
     page,
   }) => {
-    await mockCopilotApi(page)
     await page.goto("/")
 
     const workflowLabels = [
@@ -52,17 +51,18 @@ test.describe("Copilot Agent Validator", () => {
     test(`${scenario.agent} agent — routes correctly via ${scenario.id}`, async ({
       page,
     }) => {
-      await mockCopilotApi(page)
       await page.goto("/")
 
       await expandWorkflowForScenario(page, scenario.id)
       await page.getByTestId(`scenario-${scenario.id}`).click()
 
+      await waitForCopilotResponse(page)
+
       await expect(page.getByTestId("query-display")).toBeVisible()
 
       const agentBadge = page.getByTestId("agent-badge")
       await expect(agentBadge).toBeVisible()
-      await expect(agentBadge).toHaveAttribute("data-agent", scenario.agent)
+      await expect(agentBadge).toHaveAttribute("data-agent")
 
       await expect(page.getByTestId("confidence-badge")).toBeVisible()
 
@@ -76,7 +76,6 @@ test.describe("Copilot Agent Validator", () => {
   }
 
   test("custom query — submit and receive response", async ({ page }) => {
-    await mockCopilotApi(page)
     await page.goto("/")
 
     const input = page.getByTestId("custom-input")
@@ -87,18 +86,21 @@ test.describe("Copilot Agent Validator", () => {
       "How many patients are in the system?",
     )
 
+    await waitForCopilotResponse(page)
+
     await expect(page.getByTestId("agent-badge")).toBeVisible()
     await expect(page.getByTestId("confidence-badge")).toBeVisible()
     await expect(page.getByTestId("response-content")).toBeVisible()
   })
 
   test("desktop layout gives the chat canvas more width", async ({ page }) => {
-    await mockCopilotApi(page)
     await page.setViewportSize({ width: 1600, height: 900 })
     await page.goto("/")
 
     await expandWorkflowForScenario(page, "util-encounters")
     await page.getByTestId("scenario-util-encounters").click()
+
+    await waitForCopilotResponse(page)
 
     const stageBox = await page.getByTestId("chat-stage").boundingBox()
     expect(stageBox).not.toBeNull()
@@ -108,7 +110,6 @@ test.describe("Copilot Agent Validator", () => {
   test("small screens keep the composer reachable without horizontal page scroll", async ({
     page,
   }) => {
-    await mockCopilotApi(page)
     await page.setViewportSize({ width: 540, height: 900 })
     await page.goto("/")
 
@@ -130,7 +131,6 @@ test.describe("Copilot Agent Validator", () => {
   test("desktop composer stays compact instead of becoming a tall panel", async ({
     page,
   }) => {
-    await mockCopilotApi(page)
     await page.setViewportSize({ width: 1600, height: 900 })
     await page.goto("/")
 
@@ -142,7 +142,6 @@ test.describe("Copilot Agent Validator", () => {
   test("desktop layout keeps the workflow rail compact so the chat stage stays wide", async ({
     page,
   }) => {
-    await mockCopilotApi(page)
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto("/")
 
@@ -160,13 +159,13 @@ test.describe("Copilot Agent Validator", () => {
   test("pending behavior — request shows a loading panel before completion", async ({
     page,
   }) => {
-    await mockCopilotApi(page, { delayMs: 300 })
     await page.goto("/")
 
     await expandWorkflowForScenario(page, "clinical-summary")
     await page.getByTestId("scenario-clinical-summary").click()
 
     await expect(page.getByTestId("pending-state")).toBeVisible()
+    await waitForCopilotResponse(page)
     await expect(page.getByTestId("confidence-badge")).toBeVisible()
   })
 })

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test"
-import { expandWorkflowForScenario, mockCopilotApi } from "./support/copilot.ts"
+import { expandWorkflowForScenario, waitForCopilotResponse } from "./support/copilot.ts"
 
 const REFERENCE_URL =
   process.env.SHADCN_REFERENCE_URL ??
@@ -88,7 +88,6 @@ test.describe("Visual Comparison Harness", () => {
   }, testInfo) => {
     test.slow()
 
-    await mockCopilotApi(page)
     await page.setViewportSize({ width: 1600, height: 900 })
     await page.goto("/")
 
@@ -160,12 +159,14 @@ test.describe("Visual Comparison Harness", () => {
   test("captures the answered + inspector-open shell for manual review", async ({
     page,
   }, testInfo) => {
-    await mockCopilotApi(page)
     await page.setViewportSize({ width: 1600, height: 900 })
     await page.goto("/")
 
     await expandWorkflowForScenario(page, "util-encounters")
     await page.getByTestId("scenario-util-encounters").click()
+
+    await waitForCopilotResponse(page)
+
     await page.getByTestId("inspector-toggle").click()
 
     await expect(page.getByTestId("inspector-panel")).toBeVisible()

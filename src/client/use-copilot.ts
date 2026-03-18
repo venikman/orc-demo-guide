@@ -6,7 +6,6 @@ import type {
 } from "./types.ts"
 
 interface CopilotResult {
-  turns: CopilotTurn[]
   latestTurn: CopilotTurn | null
   state: CopilotState
   error: string | null
@@ -15,8 +14,9 @@ interface CopilotResult {
   reset: () => void
 }
 
-const API_ORIGIN = import.meta.env.VITE_API_URL ?? "http://localhost:3000"
-const COPILOT_URL = new URL("/api/copilot", API_ORIGIN).toString()
+const COPILOT_URL = import.meta.env.VITE_API_URL
+  ? new URL("/api/copilot", import.meta.env.VITE_API_URL).toString()
+  : "/api/copilot"
 
 export function useCopilot(): CopilotResult {
   const [turns, setTurns] = useState<CopilotTurn[]>([])
@@ -118,5 +118,5 @@ export function useCopilot(): CopilotResult {
   const isPending = state === "pending"
   const error = latestTurn?.error ?? null
 
-  return { turns, latestTurn, state, error, isPending, send, reset }
+  return { latestTurn, state, error, isPending, send, reset }
 }

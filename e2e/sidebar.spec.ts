@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { mockCopilotApi } from "./support/copilot.ts"
+import { waitForCopilotResponse } from "./support/copilot.ts"
 
 test.describe("Scenario Sidebar", () => {
   test("workflow expand/collapse keeps only the prompt list in the rail", async ({
@@ -33,11 +33,12 @@ test.describe("Scenario Sidebar", () => {
   })
 
   test("scenario prompt sends query", async ({ page }) => {
-    await mockCopilotApi(page)
     await page.goto("/")
 
     await page.getByRole("button", { name: "Utilization & Costs" }).click()
     await page.getByTestId("scenario-util-encounters").click()
+
+    await waitForCopilotResponse(page)
 
     await expect(page.getByTestId("query-display")).toHaveText(
       "All encounters for James Smith",
@@ -45,12 +46,13 @@ test.describe("Scenario Sidebar", () => {
   })
 
   test("workflow limits move to the first chat section instead of the rail", async ({ page }) => {
-    await mockCopilotApi(page)
     await page.goto("/")
 
     const sidebar = page.getByTestId("workflow-rail")
     await sidebar.getByRole("button", { name: "Utilization & Costs" }).click()
     await sidebar.getByTestId("scenario-util-encounters").click()
+
+    await waitForCopilotResponse(page)
 
     await expect(sidebar.getByText("No Claim/ExplanationOfBenefit resources", { exact: false })).not.toBeVisible()
     await expect(page.getByTestId("workflow-brief")).toContainText("Utilization & Costs")
@@ -59,7 +61,6 @@ test.describe("Scenario Sidebar", () => {
   })
 
   test("sidebar disabled during pending request", async ({ page }) => {
-    await mockCopilotApi(page, { delayMs: 300 })
     await page.goto("/")
 
     await page.getByRole("button", { name: "Membership & Attribution" }).click()
@@ -73,8 +74,9 @@ test.describe("Scenario Sidebar", () => {
     await expect(page.getByTestId("send-button")).toBeVisible()
     await expect(page.getByTestId("chat-composer")).toBeVisible()
 
-    await expect(page.getByTestId("confidence-badge")).toBeVisible()
+    await waitForCopilotResponse(page)
 
+    await expect(page.getByTestId("confidence-badge")).toBeVisible()
     await expect(scenarioBtn).toBeEnabled()
     await expect(page.getByTestId("custom-input")).toBeEnabled()
   })

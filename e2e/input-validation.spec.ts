@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { mockCopilotApi } from "./support/copilot.ts"
+import { waitForCopilotResponse } from "./support/copilot.ts"
 
 test.describe("Input Validation", () => {
   test("send button disabled when input empty", async ({ page }) => {
@@ -43,11 +43,12 @@ test.describe("Input Validation", () => {
   })
 
   test("Enter key submits query", async ({ page }) => {
-    await mockCopilotApi(page)
     await page.goto("/")
 
     await page.getByTestId("custom-input").fill("How many patients?")
     await page.getByTestId("custom-input").press("Enter")
+
+    await waitForCopilotResponse(page)
 
     await expect(page.getByTestId("query-display")).toHaveText(
       "How many patients?",
@@ -56,7 +57,6 @@ test.describe("Input Validation", () => {
   })
 
   test("input clears after submit", async ({ page }) => {
-    await mockCopilotApi(page)
     await page.goto("/")
 
     await page.getByTestId("custom-input").fill("How many patients?")

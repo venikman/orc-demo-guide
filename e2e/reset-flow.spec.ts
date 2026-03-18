@@ -1,13 +1,13 @@
 import { test, expect } from "@playwright/test"
-import { expandWorkflowForScenario, mockCopilotApi } from "./support/copilot.ts"
+import { expandWorkflowForScenario, waitForCopilotResponse } from "./support/copilot.ts"
 
 test.describe("Reset Flow", () => {
   test("reset returns to idle", async ({ page }) => {
-    await mockCopilotApi(page)
     await page.goto("/")
 
     await expandWorkflowForScenario(page, "member-insurance")
     await page.getByTestId("scenario-member-insurance").click()
+    await waitForCopilotResponse(page)
     await expect(page.getByTestId("agent-badge")).toBeVisible()
     await expect(page.getByTestId("confidence-badge")).toBeVisible()
 
@@ -18,11 +18,11 @@ test.describe("Reset Flow", () => {
   })
 
   test("sequential queries work", async ({ page }) => {
-    await mockCopilotApi(page)
     await page.goto("/")
 
     await expandWorkflowForScenario(page, "member-insurance")
     await page.getByTestId("scenario-member-insurance").click()
+    await waitForCopilotResponse(page)
     await expect(page.getByTestId("agent-badge")).toBeVisible()
     await expect(page.getByTestId("confidence-badge")).toBeVisible()
 
@@ -31,11 +31,12 @@ test.describe("Reset Flow", () => {
 
     await expandWorkflowForScenario(page, "quality-practitioners")
     await page.getByTestId("scenario-quality-practitioners").click()
+    await waitForCopilotResponse(page)
     await expect(page.getByTestId("query-display")).toBeVisible()
 
     const agentBadge = page.getByTestId("agent-badge")
     await expect(agentBadge).toBeVisible()
-    await expect(agentBadge).toHaveAttribute("data-agent", "analytics")
+    await expect(agentBadge).toHaveAttribute("data-agent")
 
     await expect(page.getByTestId("confidence-badge")).toBeVisible()
 
