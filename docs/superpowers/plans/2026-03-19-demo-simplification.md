@@ -14,49 +14,51 @@
 
 ### Files to DELETE (9 files)
 
-| File | Lines | Why |
-|------|-------|-----|
-| `src/render/catalog.ts` | 35 | json-render catalog — no longer needed |
-| `src/render/registry.tsx` | 103 | json-render registry — replaced by direct components |
-| `src/render/json-render-view.tsx` | 36 | json-render bridge — no longer needed |
-| `src/render/spec-builders.ts` | 140 | spec builder functions — replaced by React components |
-| `src/render/types.ts` | 13 | RenderTreeNode type — no longer needed |
-| `src/components/ui/card.tsx` | 56 | Card wrappers — inlined into Panel component and plain divs |
-| `src/components/ui/textarea.tsx` | 18 | Wrapper around `<textarea>` — inline the element |
-| `src/components/agent-badge.tsx` | 10 | Trivial wrapper — inline into App |
-| `src/components/confidence-badge.tsx` | 10 | Trivial wrapper — inline into App |
+| File                                  | Lines | Why                                                         |
+| ------------------------------------- | ----- | ----------------------------------------------------------- |
+| `src/render/catalog.ts`               | 35    | json-render catalog — no longer needed                      |
+| `src/render/registry.tsx`             | 103   | json-render registry — replaced by direct components        |
+| `src/render/json-render-view.tsx`     | 36    | json-render bridge — no longer needed                       |
+| `src/render/spec-builders.ts`         | 140   | spec builder functions — replaced by React components       |
+| `src/render/types.ts`                 | 13    | RenderTreeNode type — no longer needed                      |
+| `src/components/ui/card.tsx`          | 56    | Card wrappers — inlined into Panel component and plain divs |
+| `src/components/ui/textarea.tsx`      | 18    | Wrapper around `<textarea>` — inline the element            |
+| `src/components/agent-badge.tsx`      | 10    | Trivial wrapper — inline into App                           |
+| `src/components/confidence-badge.tsx` | 10    | Trivial wrapper — inline into App                           |
 
 ### Files to CREATE (1 file)
 
-| File | Purpose |
-|------|---------|
+| File                               | Purpose                                                             |
+| ---------------------------------- | ------------------------------------------------------------------- |
 | `src/components/copilot-views.tsx` | All 7 view components + shared Panel/Text/MarkdownAnswer primitives |
 
 ### Files to MODIFY (9 files)
 
-| File | Changes |
-|------|---------|
-| `src/components/ui/badge.tsx` | Rewrite: remove Base UI/CVA, use plain `<span>` + lookup |
-| `src/components/ui/button.tsx` | Rewrite: remove Base UI/CVA, use plain `<button>` + lookup |
-| `src/client/use-copilot.ts` | Flatten `turns[]` → single `turn`, remove 3 reconnect refs |
-| `src/client/App.tsx` | Use new view components, remove json-render imports, remove 7 useMemos |
+| File                           | Changes                                                                |
+| ------------------------------ | ---------------------------------------------------------------------- |
+| `src/components/ui/badge.tsx`  | Rewrite: remove Base UI/CVA, use plain `<span>` + lookup               |
+| `src/components/ui/button.tsx` | Rewrite: remove Base UI/CVA, use plain `<button>` + lookup             |
+| `src/client/use-copilot.ts`    | Flatten `turns[]` → single `turn`, remove 3 reconnect refs             |
+| `src/client/App.tsx`           | Use new view components, remove json-render imports, remove 7 useMemos |
 | `src/components/ui/dialog.tsx` | Replace `@base-ui/react/dialog` with native `<dialog>`, drop Hugeicons |
-| `src/lib/utils.ts` | Drop `tailwind-merge`, simplify `cn()` to just `clsx()` |
-| `src/index.css` | Remove `@fontsource-variable/geist` import (optional) |
-| `package.json` | Remove 9 dependencies |
-| `e2e/*.spec.ts` | Delete pixel-geometry tests, remove redundant tests |
+| `src/lib/utils.ts`             | Drop `tailwind-merge`, simplify `cn()` to just `clsx()`                |
+| `src/index.css`                | Remove `@fontsource-variable/geist` import (optional)                  |
+| `package.json`                 | Remove 9 dependencies                                                  |
+| `e2e/*.spec.ts`                | Delete pixel-geometry tests, remove redundant tests                    |
 
 ---
 
 ### Task 1: Remove Hugeicons, consolidate to lucide-react
 
 **Files:**
+
 - Modify: `src/components/ui/dialog.tsx:1-7,59`
 - Modify: `package.json` (remove `@hugeicons/core-free-icons`, `@hugeicons/react`)
 
 - [ ] **Step 1: Replace Hugeicons import with lucide in dialog.tsx**
 
 Replace the imports at lines 6-7:
+
 ```tsx
 // Remove these:
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -67,6 +69,7 @@ import { X } from "lucide-react";
 ```
 
 Replace line 59:
+
 ```tsx
 // Before:
 <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
@@ -96,12 +99,14 @@ git commit -m "refactor: consolidate icon libraries — drop Hugeicons, use luci
 ### Task 2: Drop tailwind-merge, simplify cn()
 
 **Files:**
+
 - Modify: `src/lib/utils.ts`
 - Modify: `package.json` (remove `tailwind-merge`)
 
 - [ ] **Step 1: Simplify cn() to use clsx only**
 
 Replace `src/lib/utils.ts` entirely:
+
 ```ts
 import { clsx, type ClassValue } from "clsx";
 
@@ -131,6 +136,7 @@ git commit -m "refactor: drop tailwind-merge, simplify cn() to clsx"
 ### Task 3: Replace Base UI Button with plain `<button>`
 
 **Files:**
+
 - Rewrite: `src/components/ui/button.tsx`
 - Modify: `package.json` (remove `class-variance-authority` — done after badge too)
 
@@ -145,10 +151,8 @@ const variantClasses = {
   default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
   outline:
     "border-border bg-background hover:bg-muted hover:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
-  secondary:
-    "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-  ghost:
-    "hover:bg-muted hover:text-foreground dark:hover:bg-muted/50",
+  secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+  ghost: "hover:bg-muted hover:text-foreground dark:hover:bg-muted/50",
 } as const;
 
 const sizeClasses = {
@@ -162,12 +166,7 @@ type ButtonProps = React.ComponentProps<"button"> & {
   size?: keyof typeof sizeClasses;
 };
 
-export function Button({
-  className,
-  variant = "default",
-  size = "sm",
-  ...props
-}: ButtonProps) {
+export function Button({ className, variant = "default", size = "sm", ...props }: ButtonProps) {
   return (
     <button
       data-slot="button"
@@ -200,6 +199,7 @@ git commit -m "refactor: replace Base UI Button with plain <button> + lookup tab
 ### Task 4: Replace Base UI Badge with plain `<span>`
 
 **Files:**
+
 - Rewrite: `src/components/ui/badge.tsx`
 
 - [ ] **Step 1: Rewrite badge.tsx without Base UI, useRender, mergeProps, or CVA**
@@ -219,11 +219,7 @@ type BadgeProps = React.ComponentProps<"span"> & {
   variant?: keyof typeof variantClasses;
 };
 
-export function Badge({
-  className,
-  variant = "default",
-  ...props
-}: BadgeProps) {
+export function Badge({ className, variant = "default", ...props }: BadgeProps) {
   return (
     <span
       data-slot="badge"
@@ -259,6 +255,7 @@ git commit -m "refactor: replace Base UI Badge with plain <span>"
 ### Task 5: Replace Base UI Dialog with native `<dialog>`
 
 **Files:**
+
 - Rewrite: `src/components/ui/dialog.tsx`
 
 - [ ] **Step 1: Rewrite dialog.tsx using native `<dialog>` element**
@@ -321,30 +318,17 @@ export function DialogContent({
   );
 }
 
-export function DialogTitle({
-  className,
-  ...props
-}: React.ComponentProps<"h2">) {
+export function DialogTitle({ className, ...props }: React.ComponentProps<"h2">) {
   return (
-    <h2
-      data-slot="dialog-title"
-      className={cn("text-sm font-medium", className)}
-      {...props}
-    />
+    <h2 data-slot="dialog-title" className={cn("text-sm font-medium", className)} {...props} />
   );
 }
 
-export function DialogDescription({
-  className,
-  ...props
-}: React.ComponentProps<"p">) {
+export function DialogDescription({ className, ...props }: React.ComponentProps<"p">) {
   return (
     <p
       data-slot="dialog-description"
-      className={cn(
-        "text-xs/relaxed text-muted-foreground",
-        className,
-      )}
+      className={cn("text-xs/relaxed text-muted-foreground", className)}
       {...props}
     />
   );
@@ -377,18 +361,21 @@ git commit -m "refactor: replace Base UI Dialog with native <dialog> element"
 ### Task 6: Delete Textarea wrapper, inline into App
 
 **Files:**
+
 - Delete: `src/components/ui/textarea.tsx`
 - Modify: `src/client/App.tsx` (the single import + usage of `<Textarea>`)
 
 - [ ] **Step 1: Replace Textarea import and usage in App.tsx**
 
 In `src/client/App.tsx`, remove the import:
+
 ```tsx
 // Remove:
 import { Textarea } from "@/components/ui/textarea.tsx";
 ```
 
 Replace `<Textarea` at line ~185 with a plain `<textarea`:
+
 ```tsx
 <textarea
   data-testid="custom-input"
@@ -430,6 +417,7 @@ git commit -m "refactor: inline <textarea>, delete Textarea wrapper"
 ### Task 7: Flatten useCopilot state — single turn instead of array
 
 **Files:**
+
 - Rewrite: `src/client/use-copilot.ts`
 
 - [ ] **Step 1: Rewrite use-copilot.ts with flat state**
@@ -534,7 +522,11 @@ export function useCopilot(): CopilotResult {
               case "delta":
                 setTurn((prev) =>
                   prev
-                    ? { ...prev, state: "streaming", partialAnswer: (prev.partialAnswer ?? "") + msg.content }
+                    ? {
+                        ...prev,
+                        state: "streaming",
+                        partialAnswer: (prev.partialAnswer ?? "") + msg.content,
+                      }
                     : prev,
                 );
                 break;
@@ -555,7 +547,12 @@ export function useCopilot(): CopilotResult {
             if (cancelledRef.current) return;
             setTurn((prev) => {
               if (!prev || prev.state === "done" || prev.state === "error") return prev;
-              return { ...prev, state: "error", error: "Stream closed without a final response.", partialAnswer: null };
+              return {
+                ...prev,
+                state: "error",
+                error: "Stream closed without a final response.",
+                partialAnswer: null,
+              };
             });
           },
         });
@@ -580,6 +577,7 @@ export function useCopilot(): CopilotResult {
 - [ ] **Step 2: Update App.tsx to use `turn` instead of `latestTurn`**
 
 In `src/client/App.tsx`, change the destructuring:
+
 ```tsx
 // Before:
 const { latestTurn, state, error, isPending, isStreaming, isBusy, send, reset } = useCopilot();
@@ -620,6 +618,7 @@ git commit -m "refactor: flatten useCopilot — single turn state replaces turns
 This is the biggest task. It replaces `src/render/` (5 files, 327 lines) with one file of direct React components.
 
 **Files:**
+
 - Create: `src/components/copilot-views.tsx`
 - Delete: `src/render/catalog.ts`, `src/render/registry.tsx`, `src/render/json-render-view.tsx`, `src/render/spec-builders.ts`, `src/render/types.ts`
 - Modify: `src/client/App.tsx` — replace all spec-builder + JsonRenderView usage
@@ -645,9 +644,20 @@ const textVariantClasses = {
   code: "rounded-none bg-muted px-2.5 py-2 font-mono text-[12px] leading-5 text-foreground",
 } as const;
 
-function Text({ text, variant = "body" }: { text: string; variant?: keyof typeof textVariantClasses }) {
+function Text({
+  text,
+  variant = "body",
+}: {
+  text: string;
+  variant?: keyof typeof textVariantClasses;
+}) {
   return (
-    <p className={cn("min-w-0 whitespace-normal break-words [overflow-wrap:anywhere]", textVariantClasses[variant])}>
+    <p
+      className={cn(
+        "min-w-0 whitespace-normal break-words [overflow-wrap:anywhere]",
+        textVariantClasses[variant],
+      )}
+    >
       {text}
     </p>
   );
@@ -685,11 +695,21 @@ function Panel({
     >
       {(eyebrow || title) && (
         <div className="grid auto-rows-min items-start gap-1 px-4 data-[size=sm]:px-3">
-          {eyebrow && <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">{eyebrow}</p>}
-          {title && <div className="text-base font-semibold tracking-[-0.02em] text-foreground">{title}</div>}
+          {eyebrow && (
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+              {eyebrow}
+            </p>
+          )}
+          {title && (
+            <div className="text-base font-semibold tracking-[-0.02em] text-foreground">
+              {title}
+            </div>
+          )}
         </div>
       )}
-      <div className="flex min-w-0 flex-col gap-3 px-4 [&_p]:break-words [&_p]:[overflow-wrap:anywhere]">{children}</div>
+      <div className="flex min-w-0 flex-col gap-3 px-4 [&_p]:break-words [&_p]:[overflow-wrap:anywhere]">
+        {children}
+      </div>
     </div>
   );
 }
@@ -711,7 +731,10 @@ export function IdleView({ workflowCount }: { workflowCount: number }) {
   return (
     <div className="flex flex-col gap-2">
       <h2 className="text-lg font-semibold tracking-tight">Ask the data</h2>
-      <Text text={`Pick a lane or type below. ${workflowCount} lanes stay available while the center stays focused on the active chat.`} variant="lead" />
+      <Text
+        text={`Pick a lane or type below. ${workflowCount} lanes stay available while the center stays focused on the active chat.`}
+        variant="lead"
+      />
       <Text text="Explainability stays off-canvas until you open it." variant="muted" />
     </div>
   );
@@ -741,7 +764,10 @@ export function CompletedView({ response }: { response: AgentResponse }) {
         <Badge variant="outline">{response.agentUsed}</Badge>
         <Badge variant="secondary">{response.confidence}</Badge>
       </div>
-      <Text text={`Answered by the ${response.agentUsed} agent with ${response.confidence} confidence.`} variant="muted" />
+      <Text
+        text={`Answered by the ${response.agentUsed} agent with ${response.confidence} confidence.`}
+        variant="muted"
+      />
       <MarkdownAnswer content={response.answer} />
     </Panel>
   );
@@ -752,7 +778,9 @@ export function WorkflowBriefView({ workflow }: { workflow: Workflow }) {
   return (
     <Panel title="Known limits" eyebrow={workflow.label} testId="workflow-brief" compact>
       <div className="flex flex-col gap-2">
-        {workflow.gaps.map((gap, i) => <Text key={i} text={gap} />)}
+        {workflow.gaps.map((gap, i) => (
+          <Text key={i} text={gap} />
+        ))}
       </div>
     </Panel>
   );
@@ -763,23 +791,33 @@ export function InspectorView({ response }: { response: AgentResponse }) {
     <div className="flex flex-col gap-4">
       <Panel title="Tools" eyebrow="Execution" testId="tools-used">
         <div className="flex flex-col gap-2">
-          {response.toolsUsed.length > 0
-            ? response.toolsUsed.map((tool, i) => <Text key={i} text={tool} />)
-            : <Text text="No tools were recorded for this answer." variant="muted" />}
+          {response.toolsUsed.length > 0 ? (
+            response.toolsUsed.map((tool, i) => <Text key={i} text={tool} />)
+          ) : (
+            <Text text="No tools were recorded for this answer." variant="muted" />
+          )}
         </div>
       </Panel>
       <Panel title="Reasoning" eyebrow="Trace" testId="reasoning">
         <div className="flex flex-col gap-2">
-          {response.reasoning.length > 0
-            ? response.reasoning.map((step, i) => <Text key={i} text={`${i + 1}. ${step}`} />)
-            : <Text text="No reasoning trace was returned." variant="muted" />}
+          {response.reasoning.length > 0 ? (
+            response.reasoning.map((step, i) => <Text key={i} text={`${i + 1}. ${step}`} />)
+          ) : (
+            <Text text="No reasoning trace was returned." variant="muted" />
+          )}
         </div>
       </Panel>
-      <Panel title={`Citations (${response.citations.length})`} eyebrow="Sources" testId="citations">
+      <Panel
+        title={`Citations (${response.citations.length})`}
+        eyebrow="Sources"
+        testId="citations"
+      >
         <div className="flex flex-col gap-2">
-          {response.citations.length > 0
-            ? response.citations.map((c, i) => <Text key={i} text={`${c.resourceType}/${c.id}`} />)
-            : <Text text="No citations were returned for this answer." variant="muted" />}
+          {response.citations.length > 0 ? (
+            response.citations.map((c, i) => <Text key={i} text={`${c.resourceType}/${c.id}`} />)
+          ) : (
+            <Text text="No citations were returned for this answer." variant="muted" />
+          )}
         </div>
       </Panel>
     </div>
@@ -801,20 +839,32 @@ export function ErrorView({ message }: { message: string }) {
 In `src/client/App.tsx`:
 
 Remove all json-render imports:
+
 ```tsx
 // Remove:
 import { JsonRenderView } from "@/render/json-render-view.tsx";
 import {
-  buildCompletedSpec, buildErrorSpec, buildIdleSpec, buildInspectorSpec,
-  buildPendingSpec, buildStreamingSpec, buildWorkflowBriefSpec,
+  buildCompletedSpec,
+  buildErrorSpec,
+  buildIdleSpec,
+  buildInspectorSpec,
+  buildPendingSpec,
+  buildStreamingSpec,
+  buildWorkflowBriefSpec,
 } from "@/render/spec-builders.ts";
 ```
 
 Add new imports:
+
 ```tsx
 import {
-  IdleView, PendingView, StreamingView, CompletedView,
-  WorkflowBriefView, InspectorView, ErrorView,
+  IdleView,
+  PendingView,
+  StreamingView,
+  CompletedView,
+  WorkflowBriefView,
+  InspectorView,
+  ErrorView,
 } from "@/components/copilot-views.tsx";
 ```
 
@@ -860,17 +910,21 @@ Remove all 7 spec useMemo calls and replace the JSX:
 ```
 
 Also inline the AgentBadge/ConfidenceBadge — replace:
+
 ```tsx
 <AgentBadge agent={response.agentUsed} />
 <ConfidenceBadge confidence={response.confidence} />
 ```
+
 with:
+
 ```tsx
 <Badge variant="outline" data-testid="agent-badge" data-agent={response.agentUsed}>{response.agentUsed}</Badge>
 <Badge variant="outline" data-testid="confidence-badge">{response.confidence}</Badge>
 ```
 
 Also replace the `Card`/`CardContent` usage in the inspector's "Session memory" block (~lines 268-275) with a plain `<div>`:
+
 ```tsx
 // Before:
 import { Card, CardContent } from "@/components/ui/card.tsx";
@@ -926,6 +980,7 @@ Inline AgentBadge and ConfidenceBadge into App.tsx."
 ### Task 9: Delete Card wrapper (now unused after json-render removal)
 
 **Files:**
+
 - Delete: `src/components/ui/card.tsx` (if no longer imported anywhere)
 
 - [ ] **Step 1: Verify card.tsx is not imported**
@@ -958,6 +1013,7 @@ git commit -m "refactor: delete unused Card wrapper"
 ### Task 10: Trim E2E test suite — remove pixel/geometry tests and redundant tests
 
 **Files:**
+
 - Modify: `e2e/copilot.spec.ts` — remove 4 layout bounding-box tests
 - Modify: `e2e/sidebar.spec.ts` — remove 3 pixel-position tests
 - Modify: `e2e/post-response.spec.ts` — remove badge-radius and inspector-bounds tests
@@ -1023,21 +1079,26 @@ Remaining suite: ~22 behavioral tests."
 ### Task 11: Remove @fontsource-variable/geist (optional cosmetic dependency)
 
 **Files:**
+
 - Modify: `src/index.css`
 - Modify: `package.json`
 
 - [ ] **Step 1: Remove the font import from index.css**
 
 In `src/index.css`, delete:
+
 ```css
 @import "@fontsource-variable/geist";
 ```
 
 In the `@theme inline` block, change:
+
 ```css
 --font-sans: "Geist Variable", sans-serif;
 ```
+
 to:
+
 ```css
 --font-sans: system-ui, sans-serif;
 ```
@@ -1075,6 +1136,7 @@ Expected: All remaining tests pass
 - [ ] **Step 3: Count final stats**
 
 Run:
+
 ```bash
 echo "=== Dependencies ==="
 cat package.json | grep -c '"@\|"[a-z]' | head -1
@@ -1087,6 +1149,7 @@ find src -name '*.ts' -o -name '*.tsx' | wc -l
 ```
 
 Expected roughly:
+
 - Runtime deps: ~7 (was 17)
 - Source lines: ~800 (was ~1450 .ts/.tsx)
 - Tests: ~22 (was 35)
@@ -1103,15 +1166,15 @@ git commit -m "chore: final cleanup after demo simplification"
 
 ## Summary of Removals
 
-| Package | Why removed |
-|---------|-------------|
-| `@json-render/core` | Replaced by direct React components |
-| `@json-render/react` | Replaced by direct React components |
-| `@json-render/shadcn` | Replaced by direct React components |
-| `zod` | Only used by json-render catalog |
-| `@base-ui/react` | Replaced by native HTML elements |
-| `class-variance-authority` | Replaced by plain lookup objects |
-| `@hugeicons/react` | Consolidated to lucide-react |
-| `@hugeicons/core-free-icons` | Consolidated to lucide-react |
-| `tailwind-merge` | Unnecessary for demo — clsx suffices |
-| `@fontsource-variable/geist` | Cosmetic — system font works |
+| Package                      | Why removed                          |
+| ---------------------------- | ------------------------------------ |
+| `@json-render/core`          | Replaced by direct React components  |
+| `@json-render/react`         | Replaced by direct React components  |
+| `@json-render/shadcn`        | Replaced by direct React components  |
+| `zod`                        | Only used by json-render catalog     |
+| `@base-ui/react`             | Replaced by native HTML elements     |
+| `class-variance-authority`   | Replaced by plain lookup objects     |
+| `@hugeicons/react`           | Consolidated to lucide-react         |
+| `@hugeicons/core-free-icons` | Consolidated to lucide-react         |
+| `tailwind-merge`             | Unnecessary for demo — clsx suffices |
+| `@fontsource-variable/geist` | Cosmetic — system font works         |
