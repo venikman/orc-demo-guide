@@ -21,13 +21,13 @@ import {
 import { LoaderCircle, PanelRightClose, PanelRightOpen, SendHorizontal, X } from "lucide-react";
 
 export default function App() {
-  const { latestTurn, state, error, isPending, isStreaming, isBusy, send, reset } = useCopilot();
+  const { turn, state, error, isPending, isStreaming, isBusy, send, reset } = useCopilot();
   const [draft, setDraft] = useState("");
   const [inspectorOpen, setInspectorOpen] = useState(false);
-  const response = latestTurn?.response ?? null;
-  const query = latestTurn?.query ?? null;
+  const response = turn?.response ?? null;
+  const query = turn?.query ?? null;
 
-  const partialAnswer = latestTurn?.partialAnswer ?? null;
+  const partialAnswer = turn?.partialAnswer ?? null;
   const completedSpec = useMemo(() => (response ? buildCompletedSpec(response) : null), [response]);
   const streamingSpec = partialAnswer ? buildStreamingSpec(partialAnswer) : null;
   const idleSpec = useMemo(() => buildIdleSpec(workflows), []);
