@@ -23,10 +23,10 @@ interface CopilotResult {
 let sharedConn: HubConnection | null = null;
 function getConnection(): HubConnection {
   if (!sharedConn) {
-    sharedConn = new HubConnectionBuilder()
-      .withUrl("/hubs/copilot")
-      .withAutomaticReconnect()
-      .build();
+    const hubUrl = import.meta.env.VITE_WS_URL
+      ? `${import.meta.env.VITE_WS_URL}/hubs/copilot`
+      : "/hubs/copilot";
+    sharedConn = new HubConnectionBuilder().withUrl(hubUrl).withAutomaticReconnect().build();
   }
   return sharedConn;
 }
