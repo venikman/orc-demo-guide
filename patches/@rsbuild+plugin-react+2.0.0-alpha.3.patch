@@ -1,0 +1,13 @@
+diff --git a/node_modules/@rsbuild/plugin-react/dist/index.js b/node_modules/@rsbuild/plugin-react/dist/index.js
+index 84b3339..40a5a23 100644
+--- a/node_modules/@rsbuild/plugin-react/dist/index.js
++++ b/node_modules/@rsbuild/plugin-react/dist/index.js
+@@ -85,7 +85,7 @@ function applyReactProfiler(api) {
+ function applySplitChunksRule(api, options) {
+     api.modifyBundlerChain((chain, { environment, isProd })=>{
+         let { config } = environment;
+-        if ('split-by-experience' !== config.performance.chunkSplit.strategy || !1 === options) return;
++        if ('split-by-experience' !== config.performance?.chunkSplit?.strategy || !1 === options) return;
+         let normalizedOptions = !0 === options ? {
+             react: !0,
+             router: !0
