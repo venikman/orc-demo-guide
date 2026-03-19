@@ -22,7 +22,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `npx vp dev --host 127.0.0.1 --port ${port}`,
+    command: `npx rsbuild dev --host 127.0.0.1 --port ${port}`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
   },
