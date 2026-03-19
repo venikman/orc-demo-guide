@@ -1,7 +1,7 @@
-import { defineCatalog } from "@json-render/core"
-import { schema } from "@json-render/react/schema"
-import { shadcnComponentDefinitions } from "@json-render/shadcn/catalog"
-import { z } from "zod"
+import { defineCatalog } from "@json-render/core";
+import { schema } from "@json-render/react/schema";
+import { shadcnComponentDefinitions } from "@json-render/shadcn/catalog";
+import { z } from "zod";
 
 export const copilotCatalog = defineCatalog(schema, {
   components: {
@@ -12,8 +12,6 @@ export const copilotCatalog = defineCatalog(schema, {
     Badge: shadcnComponentDefinitions.Badge,
     Separator: shadcnComponentDefinitions.Separator,
     Alert: shadcnComponentDefinitions.Alert,
-    Accordion: shadcnComponentDefinitions.Accordion,
-    Button: shadcnComponentDefinitions.Button,
     Panel: {
       props: z.object({
         title: z.string().nullable(),
@@ -34,4 +32,4 @@ export const copilotCatalog = defineCatalog(schema, {
     },
   },
   actions: {},
-})
+});

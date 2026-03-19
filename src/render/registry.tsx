@@ -1,33 +1,33 @@
-import { defineRegistry, type BaseComponentProps } from "@json-render/react"
-import { shadcnComponents } from "@json-render/shadcn"
-import { Streamdown } from "streamdown"
-import { copilotCatalog } from "./catalog.ts"
-import { Badge as UIBadge } from "@/components/ui/badge.tsx"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.tsx"
-import { cn } from "@/lib/utils.ts"
+import { defineRegistry, type BaseComponentProps } from "@json-render/react";
+import { shadcnComponents } from "@json-render/shadcn";
+import { Streamdown } from "streamdown";
+import { copilotCatalog } from "./catalog.ts";
+import { Badge as UIBadge } from "@/components/ui/badge.tsx";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.tsx";
+import { cn } from "@/lib/utils.ts";
 
 type PanelProps = {
-  title: string | null
-  eyebrow: string | null
-  testId: string | null
-  tone: "default" | "accent" | "muted" | null
-  size: "default" | "compact" | null
-}
+  title: string | null;
+  eyebrow: string | null;
+  testId: string | null;
+  tone: "default" | "accent" | "muted" | null;
+  size: "default" | "compact" | null;
+};
 
 type MarkdownAnswerProps = {
-  content: string
-  testId: string | null
-}
+  content: string;
+  testId: string | null;
+};
 
 type BadgeProps = {
-  text: string
-  variant?: "default" | "secondary" | "destructive" | "outline"
-}
+  text: string;
+  variant?: "default" | "secondary" | "destructive" | "outline";
+};
 
 type TextProps = {
-  text: string
-  variant?: "body" | "lead" | "muted" | "caption" | "code"
-}
+  text: string;
+  variant?: "body" | "lead" | "muted" | "caption" | "code";
+};
 
 const textVariantClasses: Record<NonNullable<TextProps["variant"]>, string> = {
   body: "text-sm leading-6 text-foreground",
@@ -35,13 +35,13 @@ const textVariantClasses: Record<NonNullable<TextProps["variant"]>, string> = {
   muted: "text-sm leading-5 text-muted-foreground",
   caption: "text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground",
   code: "rounded-none bg-muted px-2.5 py-2 font-mono text-[12px] leading-5 text-foreground",
-}
+};
 
 const panelToneClasses = {
   default: "bg-card",
   accent: "bg-accent/35",
   muted: "bg-muted/60",
-} as const
+} as const;
 
 export const { registry: copilotRegistry } = defineRegistry(copilotCatalog, {
   components: {
@@ -63,8 +63,6 @@ export const { registry: copilotRegistry } = defineRegistry(copilotCatalog, {
     ),
     Separator: shadcnComponents.Separator,
     Alert: shadcnComponents.Alert,
-    Accordion: shadcnComponents.Accordion,
-    Button: shadcnComponents.Button,
     Panel: ({ props, children }: BaseComponentProps<PanelProps>) => (
       <Card
         size={props.size === "compact" ? "sm" : "default"}
@@ -102,4 +100,4 @@ export const { registry: copilotRegistry } = defineRegistry(copilotCatalog, {
       </div>
     ),
   },
-})
+});

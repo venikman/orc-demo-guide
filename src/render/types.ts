@@ -1,7 +1,7 @@
 export interface RenderTreeNode {
-  component: string
-  props?: Record<string, unknown>
-  children: RenderTreeNode[]
+  component: string;
+  props?: Record<string, unknown>;
+  children: RenderTreeNode[];
 }
 
 export function node(
@@ -9,5 +9,5 @@ export function node(
   props: Record<string, unknown> = {},
   children: RenderTreeNode[] = [],
 ): RenderTreeNode {
-  return { component, props, children }
+  return { component, props, children };
 }

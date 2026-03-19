@@ -1,8 +1,8 @@
-import { useState } from "react"
-import { workflows } from "@/client/scenarios.ts"
-import { Button } from "@/components/ui/button.tsx"
-import { cn } from "@/lib/utils.ts"
-import { ChevronRight, Minus, Plus } from "lucide-react"
+import { useState } from "react";
+import { workflows } from "@/client/scenarios.ts";
+import { Button } from "@/components/ui/button.tsx";
+import { cn } from "@/lib/utils.ts";
+import { ChevronRight, Minus, Plus } from "lucide-react";
 
 export const workflowLaneDotClasses = {
   "care-gaps": "bg-[var(--workflow-care-gaps)]",
@@ -11,7 +11,7 @@ export const workflowLaneDotClasses = {
   membership: "bg-[var(--workflow-membership)]",
   clinical: "bg-[var(--workflow-clinical)]",
   reconciliation: "bg-[var(--workflow-reconciliation)]",
-} as const
+} as const;
 
 export const workflowRailClasses = {
   cardOpen: "border-primary/20 bg-accent/35",
@@ -21,15 +21,15 @@ export const workflowRailClasses = {
     "border border-[var(--workflow-partial-border)] bg-[var(--workflow-partial-bg)] text-[var(--workflow-partial-fg)]",
   promptRow:
     "border border-transparent bg-muted/45 text-foreground transition-colors hover:border-border hover:bg-accent",
-} as const
+} as const;
 
 interface ScenarioSidebarProps {
-  onSend: (query: string) => void
-  disabled: boolean
+  onSend: (query: string) => void;
+  disabled: boolean;
 }
 
 export function ScenarioSidebar({ onSend, disabled }: ScenarioSidebarProps) {
-  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   return (
     <aside
@@ -45,17 +45,15 @@ export function ScenarioSidebar({ onSend, disabled }: ScenarioSidebarProps) {
             Pick a lane
           </h2>
         </div>
-        <p className="text-sm leading-5 text-muted-foreground">
-          Open one lane and run a prompt.
-        </p>
+        <p className="text-sm leading-5 text-muted-foreground">Open one lane and run a prompt.</p>
       </div>
 
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-1">
         {workflows.map((w) => {
-          const isExpanded = expandedId === w.id
+          const isExpanded = expandedId === w.id;
           const laneDotClass =
             workflowLaneDotClasses[w.id as keyof typeof workflowLaneDotClasses] ??
-            "bg-[var(--primary)]"
+            "bg-[var(--primary)]";
           return (
             <div
               key={w.id}
@@ -123,9 +121,9 @@ export function ScenarioSidebar({ onSend, disabled }: ScenarioSidebarProps) {
                 </div>
               )}
             </div>
-          )
+          );
         })}
       </div>
     </aside>
-  )
+  );
 }

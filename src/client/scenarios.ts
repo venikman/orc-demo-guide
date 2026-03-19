@@ -1,18 +1,18 @@
-import type { AgentType } from "./types.ts"
+import type { AgentType } from "./types.ts";
 
 export interface Scenario {
-  id: string
-  agent: AgentType
-  query: string
+  id: string;
+  agent: AgentType;
+  query: string;
 }
 
 export interface Workflow {
-  id: string
-  label: string
-  description: string
-  scenarios: Scenario[]
-  examples: string[]
-  gaps: string[]
+  id: string;
+  label: string;
+  description: string;
+  scenarios: Scenario[];
+  examples: string[];
+  gaps: string[];
 }
 
 export const workflows: Workflow[] = [
@@ -43,10 +43,7 @@ export const workflows: Workflow[] = [
         query: "Active hypertension without treatment — who's at risk?",
       },
     ],
-    examples: [
-      "Patients with diabetes AND HbA1c > 9",
-      "Find all patients with type 2 diabetes",
-    ],
+    examples: ["Patients with diabetes AND HbA1c > 9", "Find all patients with type 2 diabetes"],
     gaps: [],
   },
   {
@@ -96,10 +93,7 @@ export const workflows: Workflow[] = [
         query: "Find female patients over 60",
       },
     ],
-    examples: [
-      "Tell me about patient James Smith",
-      "What procedures has patient-0001 had?",
-    ],
+    examples: ["Tell me about patient James Smith", "What procedures has patient-0001 had?"],
     gaps: [
       "No Claim/ExplanationOfBenefit resources — cannot compute actual costs or PMPM",
       "No ServiceRequest resources — cannot track referrals to specialists",
@@ -149,10 +143,7 @@ export const workflows: Workflow[] = [
         query: "Tell me about encounter-0001 in plain English",
       },
     ],
-    examples: [
-      "What conditions does patient-0001 have?",
-      "What medications is patient-0001 on?",
-    ],
+    examples: ["What conditions does patient-0001 have?", "What medications is patient-0001 on?"],
     gaps: [],
   },
   {
@@ -167,27 +158,23 @@ export const workflows: Workflow[] = [
         query: "Export all data for the ACO and tell me what we have",
       },
     ],
-    examples: [
-      "Export all data for the ACO",
-    ],
+    examples: ["Export all data for the ACO"],
     gaps: [
       "No financial reconciliation engine — exports raw FHIR data, not credit/debit calculations",
       "No Contract resources — cannot determine which patients qualify for credit by plan",
     ],
   },
-]
-
-/** Flat list of all scenarios across workflows — useful for tests and lookups */
-export const allScenarios = workflows.flatMap((w) => w.scenarios)
+];
 
 export function findWorkflowByQuery(query: string): Workflow | null {
-  const trimmed = query.trim()
-  if (!trimmed) return null
+  const trimmed = query.trim();
+  if (!trimmed) return null;
 
   return (
-    workflows.find((workflow) =>
-      workflow.scenarios.some((scenario) => scenario.query === trimmed) ||
-      workflow.examples.some((example) => example === trimmed),
+    workflows.find(
+      (workflow) =>
+        workflow.scenarios.some((scenario) => scenario.query === trimmed) ||
+        workflow.examples.some((example) => example === trimmed),
     ) ?? null
-  )
+  );
 }

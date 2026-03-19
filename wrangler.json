@@ -1,6 +1,6 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "orc-demo-guide",
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "fhir-agents-ui",
   "pages_build_output_dir": "dist",
   "compatibility_date": "2025-04-01"
 }

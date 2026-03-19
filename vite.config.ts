@@ -1,27 +1,29 @@
 import { defineConfig } from "vite-plus";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
-import path from "path";
 import { fileURLToPath } from "url";
 
 const srcPath = fileURLToPath(new URL("./src", import.meta.url));
+const apiUrl = process.env.API_URL || "http://localhost:5075";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      "@": path.resolve(srcPath),
+      "@": srcPath,
     },
   },
   server: {
     proxy: {
       "/api": {
-        target: "https://fhir-copilot.fly.dev",
+        target: apiUrl,
         changeOrigin: true,
       },
+      "/hubs": {
+        target: apiUrl,
+        changeOrigin: true,
+        ws: true,
+      },
     },
-  },
-  test: {
-    include: ["src/**/*.test.ts"],
   },
 });

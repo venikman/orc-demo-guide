@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const port = process.env.DEV_PORT || "5173";
+const baseURL = `http://127.0.0.1:${port}`;
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
@@ -9,7 +12,7 @@ export default defineConfig({
   reporter: "list",
   timeout: 120_000,
   use: {
-    baseURL: "http://127.0.0.1:5173",
+    baseURL,
     trace: "on-first-retry",
   },
   projects: [
@@ -19,8 +22,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npx vp dev --host 127.0.0.1 --port 5173",
-    url: "http://127.0.0.1:5173",
+    command: `npx vp dev --host 127.0.0.1 --port ${port}`,
+    url: baseURL,
     reuseExistingServer: !process.env.CI,
   },
 });
