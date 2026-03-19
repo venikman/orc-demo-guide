@@ -23,9 +23,12 @@ interface CopilotResult {
 let sharedConn: HubConnection | null = null;
 function getConnection(): HubConnection {
   if (!sharedConn) {
-    const hubUrl = import.meta.env.VITE_WS_URL
-      ? `${import.meta.env.VITE_WS_URL}/hubs/copilot`
-      : "/hubs/copilot";
+    let hubUrl = "/hubs/copilot";
+    if (import.meta.env.VITE_WS_URL) {
+      const u = new URL(import.meta.env.VITE_WS_URL);
+      u.protocol = u.protocol === "wss:" ? "https:" : "http:";
+      hubUrl = `${u.origin}/hubs/copilot`;
+    }
     sharedConn = new HubConnectionBuilder().withUrl(hubUrl).withAutomaticReconnect().build();
   }
   return sharedConn;
