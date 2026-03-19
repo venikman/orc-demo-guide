@@ -18,8 +18,17 @@ interface CopilotResult {
   reset: () => void;
 }
 
-function buildConnection(): HubConnection {
-  return new HubConnectionBuilder().withUrl("/hubs/copilot").withAutomaticReconnect().build();
+// Module-level singleton — survives React StrictMode double-mount without
+// creating (and aborting) a second connection during development.
+let sharedConn: HubConnection | null = null;
+function getConnection(): HubConnection {
+  if (!sharedConn) {
+    sharedConn = new HubConnectionBuilder()
+      .withUrl("/hubs/copilot")
+      .withAutomaticReconnect()
+      .build();
+  }
+  return sharedConn;
 }
 
 export function useCopilot(): CopilotResult {
@@ -30,12 +39,13 @@ export function useCopilot(): CopilotResult {
   const cancelledRef = useRef(false);
 
   useEffect(() => {
-    const conn = buildConnection();
+    const conn = getConnection();
     connRef.current = conn;
-    conn.start().catch((err) => console.error("SignalR connect failed:", err));
+    if (conn.state === HubConnectionState.Disconnected) {
+      conn.start().catch((err) => console.error("SignalR connect failed:", err));
+    }
     return () => {
       subRef.current?.dispose();
-      conn.stop();
     };
   }, []);
 
