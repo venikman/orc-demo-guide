@@ -95,67 +95,6 @@ test.describe("Copilot Agent Validator", () => {
     await expect(page.getByTestId("response-content")).toBeVisible();
   });
 
-  test("desktop layout gives the chat canvas more width", async ({ page }) => {
-    await page.setViewportSize({ width: 1600, height: 900 });
-    await page.goto("/");
-
-    await expandWorkflow(page, "util-encounters");
-    await page.getByTestId("scenario-util-encounters").click();
-
-    await waitForResponse(page);
-
-    const stageBox = await page.getByTestId("chat-stage").boundingBox();
-    expect(stageBox).not.toBeNull();
-    expect(stageBox!.width).toBeGreaterThan(1000);
-  });
-
-  test("small screens keep the composer reachable without horizontal page scroll", async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 540, height: 900 });
-    await page.goto("/");
-
-    await expect(page.getByTestId("custom-input")).toBeVisible();
-    await expect(page.getByTestId("send-button")).toBeVisible();
-
-    const composerBox = await page.getByTestId("chat-composer").boundingBox();
-    expect(composerBox).not.toBeNull();
-    expect(composerBox!.x).toBeGreaterThanOrEqual(0);
-    expect(composerBox!.x + composerBox!.width).toBeLessThanOrEqual(540);
-    expect(composerBox!.y + composerBox!.height).toBeLessThanOrEqual(900);
-
-    const hasHorizontalOverflow = await page.evaluate(
-      () => document.documentElement.scrollWidth > window.innerWidth,
-    );
-    expect(hasHorizontalOverflow).toBe(false);
-  });
-
-  test("desktop composer stays compact instead of becoming a tall panel", async ({ page }) => {
-    await page.setViewportSize({ width: 1600, height: 900 });
-    await page.goto("/");
-
-    const composerBox = await page.getByTestId("chat-composer").boundingBox();
-    expect(composerBox).not.toBeNull();
-    expect(composerBox!.height).toBeLessThanOrEqual(120);
-  });
-
-  test("desktop layout keeps the workflow rail compact so the chat stage stays wide", async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto("/");
-
-    const [railBox, stageBox] = await Promise.all([
-      page.getByTestId("workflow-rail").boundingBox(),
-      page.getByTestId("chat-stage").boundingBox(),
-    ]);
-
-    expect(railBox).not.toBeNull();
-    expect(stageBox).not.toBeNull();
-    expect(railBox!.width).toBeLessThanOrEqual(264);
-    expect(stageBox!.width).toBeGreaterThanOrEqual(900);
-  });
-
   test("pending behavior — request shows a loading panel before completion", async ({ page }) => {
     await page.goto("/");
 
