@@ -9,12 +9,19 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import {
   IdleView,
   PendingView,
-  StreamingView,
+  AnswerView,
   CompletedView,
   WorkflowBriefView,
   InspectorView,
   ErrorView,
 } from "@/components/copilot-views.tsx";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card.tsx";
 import { LoaderCircle, PanelRightClose, PanelRightOpen, SendHorizontal, X } from "lucide-react";
 
 export default function App() {
@@ -115,7 +122,15 @@ export default function App() {
 
                     {isStreaming && partialAnswer && (
                       <div className={transcriptColumnClassName}>
-                        <StreamingView content={partialAnswer} />
+                        <Card data-testid="streaming-content">
+                          <CardHeader>
+                            <CardDescription>Streaming</CardDescription>
+                            <CardTitle>Answering</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <AnswerView content={partialAnswer} isStreaming={true} />
+                          </CardContent>
+                        </Card>
                       </div>
                     )}
 

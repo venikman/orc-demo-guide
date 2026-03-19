@@ -15,10 +15,6 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/api": {
-        target: apiUrl,
-        changeOrigin: true,
-      },
       "/hubs": {
         target: apiUrl,
         changeOrigin: true,
