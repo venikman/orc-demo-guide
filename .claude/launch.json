@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "UI Dev Server",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 5173
+    },
+    {
+      "name": "UI Preview (prod build)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview"],
+      "port": 5173
+    },
+    {
+      "name": "Playwright E2E Tests",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["test"],
+      "port": 5173
+    }
+  ]
+}

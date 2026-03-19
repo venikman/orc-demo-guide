@@ -2,128 +2,121 @@ import { useState } from "react";
 import { workflows } from "@/client/scenarios.ts";
 import { Button } from "@/components/ui/button.tsx";
 import { cn } from "@/lib/utils.ts";
-import { ChevronRight, Minus, Plus } from "lucide-react";
-
-export const workflowLaneDotClasses = {
-  "care-gaps": "bg-[var(--workflow-care-gaps)]",
-  quality: "bg-[var(--workflow-quality)]",
-  utilization: "bg-[var(--workflow-utilization)]",
-  membership: "bg-[var(--workflow-membership)]",
-  clinical: "bg-[var(--workflow-clinical)]",
-  reconciliation: "bg-[var(--workflow-reconciliation)]",
-} as const;
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible.tsx";
+import { ScrollArea } from "@/components/ui/scroll-area.tsx";
+import { ChevronRight } from "lucide-react";
 
 export const workflowRailClasses = {
-  cardOpen: "border-primary/20 bg-accent/35",
-  actionChip:
-    "border border-border bg-background text-muted-foreground transition-colors group-hover:bg-muted",
-  partialBadge:
-    "border border-[var(--workflow-partial-border)] bg-[var(--workflow-partial-bg)] text-[var(--workflow-partial-fg)]",
+  cardOpen:
+    "bg-white/82 border-[rgba(42,122,138,0.14)] shadow-[0_1px_4px_rgba(42,122,138,0.06)]",
+  cardActive:
+    "bg-[rgba(42,122,138,0.08)] border-[rgba(42,122,138,0.22)] shadow-[0_0_0_1px_rgba(42,122,138,0.10)]",
   promptRow:
-    "border border-transparent bg-muted/45 text-foreground transition-colors hover:border-border hover:bg-accent",
+    "border border-transparent bg-[rgba(42,122,138,0.04)] text-foreground transition-colors hover:bg-[rgba(42,122,138,0.08)]",
 } as const;
 
 interface ScenarioSidebarProps {
   onSend: (query: string) => void;
   disabled: boolean;
+  activeQuery?: string | null;
 }
 
-export function ScenarioSidebar({ onSend, disabled }: ScenarioSidebarProps) {
+export function ScenarioSidebar({ onSend, disabled, activeQuery }: ScenarioSidebarProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const activeWorkflowId = activeQuery
+    ? workflows.find((w) =>
+        w.scenarios.some((s) => s.query === activeQuery) ||
+        w.examples.some((e) => e === activeQuery),
+      )?.id ?? null
+    : null;
 
   return (
     <aside
       data-testid="workflow-rail"
-      className="relative z-10 order-2 flex max-h-[38dvh] w-full shrink-0 flex-col gap-3 overflow-hidden border-t border-border bg-sidebar/85 px-3 py-3 backdrop-blur-sm lg:order-none lg:h-dvh lg:max-h-none lg:w-[16.25rem] lg:border-t-0 lg:border-r"
+      className={cn(
+        "relative z-10 order-2 flex h-11 w-full shrink-0 items-center gap-1.5 overflow-x-auto border-t border-white/30 bg-white/40 px-2 backdrop-blur-sm",
+        "md:order-none md:h-auto md:w-[13rem] md:flex-col md:items-stretch md:gap-1.5 md:overflow-x-visible md:overflow-y-hidden md:border-t-0 md:border-r md:border-white/30 md:bg-transparent md:px-2 md:py-2 md:backdrop-blur-none",
+      )}
     >
-      <div className="flex flex-col gap-2 px-2">
-        <div className="flex flex-col gap-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-            Workflow rail
-          </p>
-          <h2 className="text-base font-semibold tracking-[-0.03em] text-foreground">
-            Pick a lane
-          </h2>
-        </div>
-        <p className="text-sm leading-5 text-muted-foreground">Open one lane and run a prompt.</p>
+      <div className="hidden flex-col gap-0.5 px-1 md:flex">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#2a7a8a]">
+          Workflow rail
+        </p>
+        <h2 className="text-sm font-bold tracking-[-0.03em] text-[#0c2a32]">Pick a lane</h2>
+        <p className="text-xs leading-4 text-[#2a7a8a]">Open one lane and run a prompt.</p>
       </div>
 
-      <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-1">
-        {workflows.map((w) => {
-          const isExpanded = expandedId === w.id;
-          const laneDotClass =
-            workflowLaneDotClasses[w.id as keyof typeof workflowLaneDotClasses] ??
-            "bg-[var(--primary)]";
-          return (
-            <div
-              key={w.id}
-              data-testid={`workflow-card-${w.id}`}
-              className={cn(
-                "overflow-hidden rounded-none border border-border/70 bg-card",
-                isExpanded && workflowRailClasses.cardOpen,
-              )}
-            >
-              <button
-                type="button"
-                className="group block w-full px-3 py-3 text-left transition-colors hover:bg-muted/45"
-                onClick={() => setExpandedId(isExpanded ? null : w.id)}
+      {/* Mobile: flat horizontal chips */}
+      <div className="flex gap-1.5 md:hidden">
+        {workflows.map((w) => (
+          <button
+            key={w.id}
+            type="button"
+            className={cn(
+              "shrink-0 whitespace-nowrap rounded bg-white/70 border border-white/50 px-2.5 py-1.5 text-xs font-semibold text-[#0c2a32] backdrop-blur-sm transition-colors hover:bg-white/40",
+              activeWorkflowId === w.id && workflowRailClasses.cardActive,
+            )}
+            onClick={() => setExpandedId(expandedId === w.id ? null : w.id)}
+          >
+            {w.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Desktop: vertical collapsible lanes with scroll */}
+      <ScrollArea className="hidden flex-1 md:block">
+        <div className="flex flex-col gap-1">
+          {workflows.map((w) => {
+            const isExpanded = expandedId === w.id;
+            const isActive = activeWorkflowId === w.id;
+            return (
+              <Collapsible
+                key={w.id}
+                open={isExpanded}
+                onOpenChange={(open) => setExpandedId(open ? w.id : null)}
               >
-                <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1">
-                  <span className={`mt-1.5 size-2.5 shrink-0 rounded-full ${laneDotClass}`} />
-                  <div className="min-w-0">
-                    <span
-                      className="block truncate text-sm font-semibold leading-5 text-foreground"
-                      title={w.label}
-                    >
+                <div
+                  data-testid={`workflow-card-${w.id}`}
+                  className={cn(
+                    "overflow-hidden rounded bg-white/70 border border-white/50 backdrop-blur-sm transition-all hover:shadow-[0_1px_6px_rgba(42,122,138,0.10)]",
+                    isExpanded && workflowRailClasses.cardOpen,
+                    isActive && !isExpanded && workflowRailClasses.cardActive,
+                  )}
+                >
+                  <CollapsibleTrigger className="block w-full px-2.5 py-1.5 text-left transition-colors hover:bg-white/40">
+                    <span className="block truncate text-xs font-semibold leading-5 text-[#0c2a32]" title={w.label}>
                       {w.label}
                     </span>
-                    {w.gaps.length > 0 && (
-                      <span
-                        className={`inline-flex rounded-none px-1.5 py-0 text-[9px] uppercase tracking-[0.18em] ${workflowRailClasses.partialBadge}`}
-                      >
-                        partial
-                      </span>
-                    )}
-                  </div>
-                  <span
-                    data-testid={`workflow-toggle-${w.id}`}
-                    className={`mt-0.5 inline-flex items-center gap-1 self-start justify-self-end rounded-none px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.18em] ${workflowRailClasses.actionChip}`}
-                  >
-                    {isExpanded ? "Hide" : "Open"}
-                    {isExpanded ? <Minus className="size-3" /> : <Plus className="size-3" />}
-                  </span>
-                </div>
-              </button>
+                  </CollapsibleTrigger>
 
-              {isExpanded && (
-                <div className="border-t border-border/70 px-2.5 pb-2.5 pt-2">
-                  <div className="flex flex-col gap-1.5">
-                    <div className="flex items-center">
-                      <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                        Click a prompt
-                      </span>
+                  <CollapsibleContent>
+                    <div className="border-t border-black/[0.04] px-2 pb-1.5 pt-1">
+                      <div className="flex flex-col gap-0.5">
+                        {w.scenarios.map((s) => (
+                          <Button
+                            key={s.id}
+                            variant="ghost"
+                            size="sm"
+                            className={`h-auto w-full justify-start rounded-sm px-2 py-1.5 text-left text-[11px] font-medium leading-4 ${workflowRailClasses.promptRow}`}
+                            data-testid={`scenario-${s.id}`}
+                            disabled={disabled}
+                            onClick={() => onSend(s.query)}
+                            title={s.query}
+                          >
+                            <span className="truncate flex-1">{s.query}</span>
+                            <ChevronRight data-icon="inline-end" className="shrink-0 text-[#2a7a8a]" />
+                          </Button>
+                        ))}
+                      </div>
                     </div>
-                    {w.scenarios.map((s) => (
-                      <Button
-                        key={s.id}
-                        variant="ghost"
-                        size="sm"
-                        className={`h-auto w-full justify-start rounded-none px-3 py-2 text-left text-[12px] font-medium leading-5 ${workflowRailClasses.promptRow}`}
-                        data-testid={`scenario-${s.id}`}
-                        disabled={disabled}
-                        onClick={() => onSend(s.query)}
-                      >
-                        <span className="line-clamp-2 flex-1">{s.query}</span>
-                        <ChevronRight data-icon="inline-end" className="text-muted-foreground" />
-                      </Button>
-                    ))}
-                  </div>
+                  </CollapsibleContent>
                 </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+              </Collapsible>
+            );
+          })}
+        </div>
+      </ScrollArea>
     </aside>
   );
 }

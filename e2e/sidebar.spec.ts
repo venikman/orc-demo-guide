@@ -81,31 +81,24 @@ test.describe("Scenario Sidebar", () => {
     await expect(page.getByTestId("custom-input")).toBeEnabled();
   });
 
-  test("partial badge visible on workflows with gaps", async ({ page }) => {
+  test("all workflow lanes visible without partial badges", async ({ page }) => {
     await page.goto("/");
 
-    // Scope to the sidebar to avoid matching main area badges
     const sidebar = page.getByTestId("workflow-rail");
 
-    // Workflows with gaps should show "partial" badge in the sidebar
-    const partialBadges = sidebar.getByText("partial", { exact: true });
-    await expect(partialBadges).toHaveCount(4);
-
-    // Verify the four workflows with gaps have the badge
+    // All 6 workflow lanes should be visible
     for (const label of [
+      "Care Gaps",
       "Quality & Performance",
       "Utilization & Costs",
       "Membership & Attribution",
+      "Patient History & Continuity",
       "Reconciliation & Export",
     ]) {
-      const header = sidebar.getByRole("button", { name: label });
-      await expect(header.getByText("partial")).toBeVisible();
+      await expect(sidebar.getByRole("button", { name: label })).toBeVisible();
     }
 
-    // Workflows without gaps should not have the badge
-    for (const label of ["Care Gaps", "Patient History & Continuity"]) {
-      const header = sidebar.getByRole("button", { name: label });
-      await expect(header.getByText("partial")).not.toBeVisible();
-    }
+    // Partial badges were intentionally removed from the sidebar
+    await expect(sidebar.getByText("partial", { exact: true })).toHaveCount(0);
   });
 });
