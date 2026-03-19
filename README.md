@@ -19,7 +19,7 @@ API_URL=http://localhost:5075
 DEV_PORT=5173
 ```
 
-The `dev` script loads it via `node --env-file=.env`. Both variables have hardcoded defaults, so the app works without the file.
+Both variables have hardcoded defaults, so the app works without the file.
 
 ## How it works
 
@@ -29,26 +29,24 @@ Browser ──SignalR WS──▸ Vite proxy ──▸ Agents API (localhost:507
            /api/*                      /api/copilot    (REST fallback)
 ```
 
-The UI opens a persistent SignalR WebSocket connection to `/hubs/copilot`. Queries are streamed via `StreamQuery`, which yields `ServerEvent` items (`meta` → `delta`\* → `done`). The Vite dev server proxies both HTTP (`/api`) and WebSocket (`/hubs`) traffic to the agents server.
+The UI opens a persistent SignalR WebSocket connection to `/hubs/copilot`. Queries are streamed via `StreamQuery`, which yields `ServerEvent` items (`meta` → `delta`\* → `done`).
 
 ## Testing
 
 Tests run against a live agents server — no mocks.
 
 ```bash
-npm test                              # all 37 E2E tests
-npx playwright test e2e/copilot.spec.ts  # single file
+npm test                                  # all E2E tests
+npx playwright test e2e/copilot.spec.ts   # single file
 ```
-
-Playwright auto-starts a Vite dev server on port 5173. Tests do **not** load `.env` — they rely on the hardcoded defaults in `vite.config.ts` and `playwright.config.ts`.
 
 ## Stack
 
 | Layer     | Tech                           |
 | --------- | ------------------------------ |
 | Framework | React 19                       |
-| Build     | Vite 8 / vite-plus             |
-| Styling   | Tailwind CSS 4, shadcn         |
+| Build     | Vite 8                         |
+| Styling   | Tailwind CSS 4                 |
 | Transport | @microsoft/signalr (WebSocket) |
+| Markdown  | Streamdown (streaming)         |
 | Tests     | Playwright                     |
-| Rendering | @json-render (spec-driven UI)  |

@@ -55,7 +55,7 @@ npm run dev
 Tests require the agents server running at `http://localhost:5075`.
 
 ```bash
-# Run all 37 E2E tests
+# Run all E2E tests
 npm test
 
 # Run a specific test file
