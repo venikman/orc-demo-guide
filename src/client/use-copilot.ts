@@ -26,7 +26,8 @@ function getConnection(): HubConnection {
     let hubUrl = "/hubs/copilot";
     if (import.meta.env.VITE_WS_URL) {
       const u = new URL(import.meta.env.VITE_WS_URL);
-      u.protocol = u.protocol === "wss:" ? "https:" : "http:";
+      if (u.protocol === "wss:") u.protocol = "https:";
+      else if (u.protocol === "ws:") u.protocol = "http:";
       hubUrl = `${u.origin}/hubs/copilot`;
     }
     sharedConn = new HubConnectionBuilder().withUrl(hubUrl).withAutomaticReconnect().build();
