@@ -3,21 +3,18 @@ import "streamdown/styles.css";
 import { useCopilot } from "./use-copilot.ts";
 import { findWorkflowByQuery, workflows } from "./scenarios.ts";
 import { ScenarioSidebar } from "@/components/scenario-sidebar.tsx";
-import { AgentBadge } from "@/components/agent-badge.tsx";
-import { ConfidenceBadge } from "@/components/confidence-badge.tsx";
+import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { Card, CardContent } from "@/components/ui/card.tsx";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog.tsx";
-import { JsonRenderView } from "@/render/json-render-view.tsx";
 import {
-  buildCompletedSpec,
-  buildErrorSpec,
-  buildIdleSpec,
-  buildInspectorSpec,
-  buildPendingSpec,
-  buildStreamingSpec,
-  buildWorkflowBriefSpec,
-} from "@/render/spec-builders.ts";
+  IdleView,
+  PendingView,
+  StreamingView,
+  CompletedView,
+  WorkflowBriefView,
+  InspectorView,
+  ErrorView,
+} from "@/components/copilot-views.tsx";
 import { LoaderCircle, PanelRightClose, PanelRightOpen, SendHorizontal, X } from "lucide-react";
 
 export default function App() {
@@ -28,17 +25,8 @@ export default function App() {
   const query = turn?.query ?? null;
 
   const partialAnswer = turn?.partialAnswer ?? null;
-  const completedSpec = useMemo(() => (response ? buildCompletedSpec(response) : null), [response]);
-  const streamingSpec = partialAnswer ? buildStreamingSpec(partialAnswer) : null;
-  const idleSpec = useMemo(() => buildIdleSpec(workflows), []);
-  const pendingSpec = useMemo(() => (query ? buildPendingSpec(query) : null), [query]);
-  const inspectorSpec = useMemo(() => (response ? buildInspectorSpec(response) : null), [response]);
   const activeWorkflow = useMemo(() => (query ? findWorkflowByQuery(query) : null), [query]);
-  const workflowBriefSpec = useMemo(
-    () => (activeWorkflow ? buildWorkflowBriefSpec(activeWorkflow) : null),
-    [activeWorkflow],
-  );
-  const showInspector = Boolean(response && inspectorSpec);
+  const showInspector = Boolean(response);
   const transcriptColumnClassName = "w-full max-w-[54rem]";
 
   const handleSend = (nextQuery: string) => {
@@ -98,7 +86,7 @@ export default function App() {
                   >
                     {state === "idle" && (
                       <div data-testid="idle-message" className="max-w-2xl pt-6">
-                        <JsonRenderView tree={idleSpec} />
+                        <IdleView workflowCount={workflows.length} />
                       </div>
                     )}
 
@@ -113,42 +101,45 @@ export default function App() {
                       </div>
                     )}
 
-                    {workflowBriefSpec && (
+                    {activeWorkflow && (
                       <div className={transcriptColumnClassName}>
-                        <JsonRenderView tree={workflowBriefSpec} />
+                        <WorkflowBriefView workflow={activeWorkflow} />
                       </div>
                     )}
 
-                    {isPending && pendingSpec && (
+                    {isPending && query && (
                       <div className={transcriptColumnClassName}>
-                        <JsonRenderView tree={pendingSpec} />
+                        <PendingView query={query} />
                       </div>
                     )}
 
-                    {isStreaming && streamingSpec && (
+                    {isStreaming && partialAnswer && (
                       <div className={transcriptColumnClassName}>
-                        <JsonRenderView tree={streamingSpec} />
+                        <StreamingView content={partialAnswer} />
                       </div>
                     )}
 
                     {error && (
                       <div className={transcriptColumnClassName}>
-                        <div
-                          data-testid="error-message"
-                          className="rounded-none border border-destructive/20 bg-card p-4"
-                        >
-                          <JsonRenderView tree={buildErrorSpec(error)} />
-                        </div>
+                        <ErrorView message={error} />
                       </div>
                     )}
 
-                    {response && completedSpec && (
+                    {response && (
                       <>
                         <div
                           className={`flex flex-wrap items-center gap-2.5 ${transcriptColumnClassName}`}
                         >
-                          <AgentBadge agent={response.agentUsed} />
-                          <ConfidenceBadge confidence={response.confidence} />
+                          <Badge
+                            variant="outline"
+                            data-testid="agent-badge"
+                            data-agent={response.agentUsed}
+                          >
+                            {response.agentUsed}
+                          </Badge>
+                          <Badge variant="outline" data-testid="confidence-badge">
+                            {response.confidence}
+                          </Badge>
                           <Button
                             type="button"
                             variant={inspectorOpen ? "secondary" : "outline"}
@@ -167,7 +158,7 @@ export default function App() {
                         </div>
 
                         <div className={transcriptColumnClassName}>
-                          <JsonRenderView tree={completedSpec} />
+                          <CompletedView response={response} />
                         </div>
                       </>
                     )}
@@ -264,15 +255,13 @@ export default function App() {
 
               <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-4">
                 <div className="flex flex-col gap-4">
-                  <Card className="rounded-none bg-muted/40 shadow-none">
-                    <CardContent className="flex flex-col gap-2 text-sm leading-6 text-muted-foreground">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                        Session memory
-                      </p>
-                      <p>Follow-up questions keep the same thread until you clear the session.</p>
-                    </CardContent>
-                  </Card>
-                  <JsonRenderView tree={inspectorSpec} />
+                  <div className="flex flex-col gap-2 rounded-none bg-muted/40 px-4 py-4 text-sm leading-6 text-muted-foreground ring-1 ring-foreground/10">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                      Session memory
+                    </p>
+                    <p>Follow-up questions keep the same thread until you clear the session.</p>
+                  </div>
+                  <InspectorView response={response} />
                 </div>
               </div>
             </div>
