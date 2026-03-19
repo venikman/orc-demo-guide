@@ -24,9 +24,9 @@ Both variables have hardcoded defaults, so the app works without the file.
 ## How it works
 
 ```
-Browser ──SignalR WS──▸ Vite proxy ──▸ Agents API (localhost:5075)
-           /hubs/copilot               /hubs/copilot  (SignalR hub)
-           /api/*                      /api/copilot    (REST fallback)
+Dev:   Browser ──SignalR WS──▸ Vite proxy ──▸ Agents API (localhost:5075)
+Prod:  Browser ──SignalR WS──▸ Agents API   (VITE_WS_URL origin)
+                 /hubs/copilot               /hubs/copilot  (SignalR hub)
 ```
 
 The UI opens a persistent SignalR WebSocket connection to `/hubs/copilot`. Queries are streamed via `StreamQuery`, which yields `ServerEvent` items (`meta` → `delta`\* → `done`).

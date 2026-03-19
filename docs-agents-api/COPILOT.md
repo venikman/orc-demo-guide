@@ -128,79 +128,35 @@ bun run src/server.ts
 
 ### Endpoints
 
-| Endpoint          | Method | Purpose                           |
-| ----------------- | ------ | --------------------------------- |
-| `/health`         | GET    | Health check → `{ status: "ok" }` |
-| `/api/copilot`    | POST   | Sync query → `AgentResponse` JSON |
-| `/api/copilot/ws` | WS     | Streaming via WebSocket           |
+| Endpoint        | Method | Purpose                                                |
+| --------------- | ------ | ------------------------------------------------------ |
+| `/health`       | GET    | Health check → `{ status: "ok" }`                      |
+| `/hubs/copilot` | WS     | SignalR hub — `StreamQuery` yields `ServerEvent` items |
 
-### Sync API
+### SignalR Protocol
 
-```bash
-curl -X POST http://localhost:3000/api/copilot \
-  -H "Content-Type: application/json" \
-  -d '{"query": "How many patients?", "threadId": "optional-thread-id"}'
+The UI connects via `@microsoft/signalr` to `/hubs/copilot`. The hub exposes
+`StreamQuery(CopilotRequest)` as an async server stream.
+
+**ServerEvent types (in order):**
+
+```
+meta   → { agentType, threadId }
+delta  → { content }           (0..N partial answer chunks)
+tool   → { name, preview }     (optional)
+done   → { response }          (final AgentResponse)
+error  → { message }
 ```
 
-### WebSocket Protocol
-
-Connect to `ws://localhost:3000/api/copilot/ws`.
-
-**Client → Server:**
-
-```json
-{ "type": "query", "query": "...", "threadId": "..." }
-```
-
-**Server → Client (in order):**
-
-```json
-{ "type": "meta", "agentType": "clinical", "threadId": "..." }
-{ "type": "delta", "content": "partial text..." }
-{ "type": "tool", "name": "fhir_search_conditions", "preview": "..." }
-{ "type": "done", "response": { "answer": "...", "citations": [...], ... } }
-```
-
-On error: `{ "type": "error", "message": "..." }`
-
-The connection stays open after `done` — send another `query` message for multi-turn conversation.
-
-### WebSocket Client Example (browser)
-
-```javascript
-const ws = new WebSocket("ws://localhost:3000/api/copilot/ws");
-ws.onmessage = ({ data }) => {
-  const msg = JSON.parse(data);
-  switch (msg.type) {
-    case "meta":
-      console.log(`Agent: ${msg.agentType}`);
-      break;
-    case "delta":
-      process.stdout.write(msg.content);
-      break;
-    case "tool":
-      console.log(`Tool: ${msg.name}`);
-      break;
-    case "done":
-      console.log("Response:", msg.response);
-      break;
-    case "error":
-      console.error(msg.message);
-      break;
-  }
-};
-ws.onopen = () => {
-  ws.send(JSON.stringify({ type: "query", query: "Clinical summary for patient-0001" }));
-};
-```
+The connection stays open after `done` — send another `StreamQuery` for multi-turn conversation.
 
 ### What's deployed
 
-- HTTP server (Elysia) with sync + WebSocket streaming
+- .NET agents server with SignalR hub streaming
 - Persistent memory (`BunSqliteSaver` backed by `bun:sqlite`, WAL mode)
 - 6 agents, router, 12 tools, explainability — complete and tested
 - OTel tracing via OpenLIT SDK auto-instrumentation + manual spans for router, FHIR HTTP, explainability
-- Dockerfile for Railway deployment (`bun:sqlite` on persistent volume)
+- Deployed on Fly.dev
 
 ### Observability
 
@@ -220,11 +176,9 @@ copilot.query (root)
 **Local:** `docker compose up -d` → OpenLIT UI at `http://localhost:3001`
 **Deploy:** Set `OTEL_EXPORTER_OTLP_ENDPOINT` + `OTEL_EXPORTER_OTLP_HEADERS` for Grafana Cloud
 
-### Deployment (Railway)
+### Deployment (Fly.dev)
 
-1. Connect GitHub repo → Railway auto-deploys on push
-2. Add persistent volume mounted at `/app/data` for SQLite checkpoints
-3. Set environment variables: `GOOGLE_API_KEY`, `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS`
+The agents server is deployed on Fly.dev with persistent volume for SQLite checkpoints.
 
 ### What's needed for production
 

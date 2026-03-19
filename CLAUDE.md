@@ -11,9 +11,8 @@ Two separate servers:
 | **UI (Vite dev)** | `http://localhost:5173` | Serves the React SPA                         |
 | **Agents API**    | `http://localhost:5075` | .NET backend — routes queries to FHIR agents |
 
-The Vite dev server proxies both REST and WebSocket traffic to the agents server:
+The Vite dev server proxies WebSocket traffic to the agents server:
 
-- `/api/*` → REST (copilot sync/stream endpoints)
 - `/hubs/*` → SignalR WebSocket (`/hubs/copilot` hub)
 
 ## Transport
@@ -29,10 +28,11 @@ Thread identity (`threadId`) is managed client-side and reset on "Clear".
 
 Defined in `.env` (gitignored). Loaded in dev via `node --env-file=.env`.
 
-| Variable   | Default                 | Used by                | Purpose                                   |
-| ---------- | ----------------------- | ---------------------- | ----------------------------------------- |
-| `API_URL`  | `http://localhost:5075` | `vite.config.ts`       | Agents server URL for the Vite proxy      |
-| `DEV_PORT` | `5173`                  | `playwright.config.ts` | Port for the Vite dev server during tests |
+| Variable      | Default                 | Used by                | Purpose                                             |
+| ------------- | ----------------------- | ---------------------- | --------------------------------------------------- |
+| `API_URL`     | `http://localhost:5075` | `vite.config.ts`       | Agents server URL for the Vite dev proxy            |
+| `DEV_PORT`    | `5173`                  | `playwright.config.ts` | Port for the Vite dev server during tests           |
+| `VITE_WS_URL` | —                       | `use-copilot.ts`       | Production agents server origin (set in Cloudflare) |
 
 **Tests do NOT load the `.env` file.** Playwright spawns its own Vite dev server via
 `npx vp dev` (no `--env-file`), so the hardcoded defaults in `vite.config.ts` and
@@ -67,9 +67,11 @@ same port, it reuses it (unless `CI=true`).
 
 ## Key decisions
 
-- **SignalR over SSE**: switched from SSE (`/api/copilot/stream`) to SignalR WebSocket
-  (`/hubs/copilot`) for persistent bidirectional connection. SignalR handles reconnection,
-  transport negotiation, and stream cancellation natively.
+- **SignalR WebSocket**: the UI connects to the `/hubs/copilot` SignalR hub for
+  persistent bidirectional streaming. SignalR handles reconnection, transport
+  negotiation, and stream cancellation natively. In dev, the Vite proxy forwards
+  `/hubs/*` to the local agents server. In production, `VITE_WS_URL` points the
+  client directly at the agents server origin (no proxy).
 
 - **No `.env` in tests**: tests rely on hardcoded defaults so they work in CI without
   env file setup. The `dev` script uses `node --env-file=.env` (Node 20+) to load vars
