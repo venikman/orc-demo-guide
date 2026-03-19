@@ -24,7 +24,7 @@ Both variables have hardcoded defaults, so the app works without the file.
 ## How it works
 
 ```
-Dev:   Browser ──SignalR WS──▸ Vite proxy ──▸ Agents API (localhost:5075)
+Dev:   Browser ──SignalR WS──▸ Rsbuild proxy ──▸ Agents API (localhost:5075)
 Prod:  Browser ──SignalR WS──▸ Agents API   (VITE_WS_URL origin)
                  /hubs/copilot               /hubs/copilot  (SignalR hub)
 ```
@@ -45,7 +45,7 @@ npx playwright test e2e/copilot.spec.ts   # single file
 | Layer     | Tech                           |
 | --------- | ------------------------------ |
 | Framework | React 19                       |
-| Build     | Vite 8                         |
+| Build     | Rsbuild 2 (Rspack)             |
 | Styling   | Tailwind CSS 4                 |
 | Transport | @microsoft/signalr (WebSocket) |
 | Markdown  | Streamdown (streaming)         |

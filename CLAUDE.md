@@ -1,6 +1,6 @@
 # FHIR Copilot UI
 
-React + Vite front-end for the FHIR Copilot Agent Framework.
+React + Rsbuild front-end for the FHIR Copilot Agent Framework.
 
 ## Architecture
 
@@ -8,10 +8,10 @@ Two separate servers:
 
 | Server            | Default                 | Purpose                                      |
 | ----------------- | ----------------------- | -------------------------------------------- |
-| **UI (Vite dev)** | `http://localhost:5173` | Serves the React SPA                         |
+| **UI (Rsbuild dev)** | `http://localhost:5173` | Serves the React SPA                      |
 | **Agents API**    | `http://localhost:5075` | .NET backend — routes queries to FHIR agents |
 
-The Vite dev server proxies WebSocket traffic to the agents server:
+The Rsbuild dev server proxies WebSocket traffic to the agents server:
 
 - `/hubs/*` → SignalR WebSocket (`/hubs/copilot` hub)
 
@@ -30,12 +30,12 @@ Defined in `.env` (gitignored). Loaded in dev via `node --env-file=.env`.
 
 | Variable      | Default                 | Used by                | Purpose                                             |
 | ------------- | ----------------------- | ---------------------- | --------------------------------------------------- |
-| `API_URL`     | `http://localhost:5075` | `vite.config.ts`       | Agents server URL for the Vite dev proxy            |
-| `DEV_PORT`    | `5173`                  | `playwright.config.ts` | Port for the Vite dev server during tests           |
+| `API_URL`     | `http://localhost:5075` | `rsbuild.config.ts`    | Agents server URL for the Rsbuild dev proxy         |
+| `DEV_PORT`    | `5173`                  | `playwright.config.ts` | Port for the Rsbuild dev server during tests        |
 | `VITE_WS_URL` | —                       | `use-copilot.ts`       | Production agents server origin (set in Cloudflare) |
 
-**Tests do NOT load the `.env` file.** Playwright spawns its own Vite dev server via
-`npx vp dev` (no `--env-file`), so the hardcoded defaults in `vite.config.ts` and
+**Tests do NOT load the `.env` file.** Playwright spawns its own Rsbuild dev server via
+`npx rsbuild dev` (no `--env-file`), so the hardcoded defaults in `rsbuild.config.ts` and
 `playwright.config.ts` are used. This is intentional — tests should work without any env setup
 as long as the agents server is running at `http://localhost:5075`.
 
@@ -62,21 +62,20 @@ npm test
 npx playwright test e2e/copilot.spec.ts
 ```
 
-Playwright auto-starts a Vite dev server for the tests. If one is already running on the
+Playwright auto-starts an Rsbuild dev server for the tests. If one is already running on the
 same port, it reuses it (unless `CI=true`).
 
 ## Key decisions
 
 - **SignalR WebSocket**: the UI connects to the `/hubs/copilot` SignalR hub for
   persistent bidirectional streaming. SignalR handles reconnection, transport
-  negotiation, and stream cancellation natively. In dev, the Vite proxy forwards
+  negotiation, and stream cancellation natively. In dev, the Rsbuild proxy forwards
   `/hubs/*` to the local agents server. In production, `VITE_WS_URL` points the
   client directly at the agents server origin (no proxy).
 
 - **No `.env` in tests**: tests rely on hardcoded defaults so they work in CI without
   env file setup. The `dev` script uses `node --env-file=.env` (Node 20+) to load vars
-  at the process level — Vite's built-in `.env` loading only populates `import.meta.env`,
-  not `process.env` in `vite.config.ts`.
+  at the process level so `process.env.API_URL` is available in `rsbuild.config.ts`.
 
 - **Fast-backend-safe tests**: E2E tests don't assert on transient states (pending/streaming)
   that may resolve in < 5ms. Instead they assert on the final outcome (response rendered,
@@ -86,7 +85,7 @@ same port, it reuses it (unless `CI=true`).
 
 | Command         | What it does                             |
 | --------------- | ---------------------------------------- |
-| `npm run dev`   | Start Vite dev server with `.env` loaded |
-| `npm run build` | Production build                         |
-| `npm test`      | Run Playwright E2E suite                 |
-| `npm run check` | Type-check via vite-plus                 |
+| `npm run dev`   | Start Rsbuild dev server with `.env` loaded |
+| `npm run build` | Production build via Rsbuild                |
+| `npm test`      | Run Playwright E2E suite                    |
+| `npm run check` | Lint (oxlint) + type-check (tsc)            |

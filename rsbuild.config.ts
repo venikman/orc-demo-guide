@@ -1,7 +1,8 @@
-import { defineConfig } from "@rsbuild/core";
+import { defineConfig, loadEnv } from "@rsbuild/core";
 import { pluginReact } from "@rsbuild/plugin-react";
 
 const apiUrl = process.env.API_URL || "http://localhost:5075";
+const { publicVars } = loadEnv({ prefixes: ["VITE_"] });
 
 export default defineConfig({
   plugins: [pluginReact()],
@@ -12,6 +13,7 @@ export default defineConfig({
     alias: {
       "@": "./src",
     },
+    define: publicVars,
   },
   html: {
     template: "./index.html",

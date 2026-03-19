@@ -276,7 +276,7 @@ export default function App() {
                     </p>
                     <p>Follow-up questions keep the same thread until you clear the session.</p>
                   </div>
-                  <InspectorView response={response} />
+                  <InspectorView response={response!} />
                 </div>
               </div>
             </div>
